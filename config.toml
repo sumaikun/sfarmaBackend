@@ -1,0 +1,4 @@
+port = "8095"
+jwtKey = "asdfklñk11323kl"
+server = "localhost:27017"
+database = "sfarma"
