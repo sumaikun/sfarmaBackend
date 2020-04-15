@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"reflect"
 
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
 	Config "github.com/sumaikun/sfarma-rest-api/config"
@@ -34,6 +32,27 @@ func registerType(typedNil interface{}) {
 
 func makeInstance(name string) interface{} {
 	return reflect.New(typeRegistry[name]).Elem().Interface()
+}
+
+// CORSRouterDecorator applies CORS headers to a mux.Router
+type CORSRouterDecorator struct {
+	R *mux.Router
+}
+
+// ServeHTTP wraps the HTTP server enabling CORS headers.
+// For more info about CORS, visit https://www.w3.org/TR/cors/
+func (c *CORSRouterDecorator) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	if origin := req.Header.Get("Origin"); origin != "" {
+		rw.Header().Set("Access-Control-Allow-Origin", origin)
+		rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		rw.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Type, YourOwnHeader")
+	}
+	// Stop here if its Preflighted OPTIONS request
+	if req.Method == "OPTIONS" {
+		return
+	}
+
+	c.R.ServeHTTP(rw, req)
 }
 
 //-------------------
@@ -85,11 +104,6 @@ func main() {
 	router.Handle("/fileUpload", middleware.AuthMiddleware(http.HandlerFunc(fileUpload))).Methods("POST")
 	router.HandleFunc("/serveImage/{image}", serveImage).Methods("GET")
 
-	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
-	originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	log.Fatal(http.ListenAndServe(":"+port, &CORSRouterDecorator{router}))
 
-	//log.Fatal(http.ListenAndServe(":"+port, router))
-
-	log.Fatal(http.ListenAndServe(":"+port, handlers.CORS(originsOk, headersOk, methodsOk)(router)))
 }
