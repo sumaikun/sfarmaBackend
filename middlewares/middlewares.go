@@ -7,7 +7,7 @@ import (
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 
-	C "github.com/sumaikun/go-rest-api/config"
+	C "github.com/sumaikun/sfarma-rest-api/config"
 )
 
 // AuthMiddleware verify
