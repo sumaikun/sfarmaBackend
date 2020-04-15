@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
 	Config "github.com/sumaikun/sfarma-rest-api/config"
