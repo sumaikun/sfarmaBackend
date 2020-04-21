@@ -10,10 +10,12 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
 
@@ -68,6 +70,8 @@ func authentication(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			//log.Println("user found login", user)
+
 			response.User = user.(bson.M)
 
 		}
@@ -112,7 +116,17 @@ func authentication(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// Prestashop Integration
+func authUserCheck(w http.ResponseWriter, r *http.Request) {
+
+	user := context.Get(r, "user")
+
+	userParsed := user.(bson.M)
+
+	log.Println("user after context", userParsed)
+
+}
+
+// ----------Prestashop Integration ----------------------------------------
 
 func getAllRequest(url string) map[string][]interface{} {
 	// By now our original request body should have been populated, so let's just use it with our custom request
@@ -392,13 +406,28 @@ func allProductsEndPoint(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 
-	products, err := dao.FindAll("products")
-	if err != nil {
-		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	user := context.Get(r, "user")
+
+	userParsed := user.(bson.M)
+
+	if userParsed["role"] == "admin" {
+		products, err := dao.FindAll("products")
+		if err != nil {
+			Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		Helpers.RespondWithJSON(w, http.StatusOK, products)
+
+	} else {
+		products, err := dao.FindManyByKEY("products", "laboratory", strconv.Itoa(userParsed["laboratory"].(int)))
+		if err != nil {
+			Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		Helpers.RespondWithJSON(w, http.StatusOK, products)
 	}
 
-	Helpers.RespondWithJSON(w, http.StatusOK, products)
 }
 
 func createProductEndPoint(w http.ResponseWriter, r *http.Request) {
@@ -414,16 +443,35 @@ func createProductEndPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println(product)
+
 	product.ID = bson.NewObjectId()
 	product.Date = time.Now().String()
 	product.UpdateDate = time.Now().String()
 
-	if err := dao.Insert("products", product, []string{"name"}); err != nil {
-		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	user := context.Get(r, "user")
 
-	Helpers.RespondWithJSON(w, http.StatusCreated, product)
+	userParsed := user.(bson.M)
+
+	if userParsed["role"] != "admin" {
+		product.User = userParsed["_id"].(bson.ObjectId)
+		product.Laboratory = strconv.Itoa(userParsed["laboratory"].(int))
+		if err := dao.Insert("products", product, []string{"name"}); err != nil {
+			Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		Helpers.RespondWithJSON(w, http.StatusCreated, product)
+	} else {
+
+		if err := dao.Insert("products", product, []string{"name"}); err != nil {
+			Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		Helpers.RespondWithJSON(w, http.StatusCreated, product)
+
+	}
 
 }
 
@@ -481,6 +529,109 @@ func updateProductEndPoint(w http.ResponseWriter, r *http.Request) {
 	product.UpdateDate = time.Now().String()
 
 	if err := dao.Update("products", product.ID, product); err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	Helpers.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+
+}
+
+//-------------------------------------- Transfers Functions ----------------------------------
+
+func allTransfersEndPoint(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-type", "application/json")
+
+	products, err := dao.FindAll("transfers")
+	if err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	Helpers.RespondWithJSON(w, http.StatusOK, products)
+}
+
+func createTransferEndPoint(w http.ResponseWriter, r *http.Request) {
+
+	defer r.Body.Close()
+	w.Header().Set("Content-type", "application/json")
+
+	err, transfer := transferValidator(r)
+
+	if len(err["validationError"].(url.Values)) > 0 {
+		//fmt.Println(len(e))
+		Helpers.RespondWithJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
+	transfer.ID = bson.NewObjectId()
+	transfer.Date = time.Now().String()
+	transfer.UpdateDate = time.Now().String()
+
+	if err := dao.Insert("transfers", transfer, nil); err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	Helpers.RespondWithJSON(w, http.StatusCreated, transfer)
+
+}
+
+func findTransferEndpoint(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	transfer, err := dao.FindByID("transfers", params["id"])
+	if err != nil {
+		Helpers.RespondWithError(w, http.StatusBadRequest, "Invalid Transfer ID")
+		return
+	}
+	Helpers.RespondWithJSON(w, http.StatusOK, transfer)
+
+}
+
+func removeTransferEndpoint(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	err := dao.DeleteByID("transfers", params["id"])
+	if err != nil {
+		Helpers.RespondWithError(w, http.StatusBadRequest, "Invalid Transfer ID")
+		return
+	}
+	Helpers.RespondWithJSON(w, http.StatusOK, nil)
+
+}
+
+func updateTransferEndPoint(w http.ResponseWriter, r *http.Request) {
+
+	defer r.Body.Close()
+	params := mux.Vars(r)
+
+	w.Header().Set("Content-type", "application/json")
+
+	err, transfer := productValidator(r)
+
+	if len(err["validationError"].(url.Values)) > 0 {
+		//fmt.Println(len(e))
+		Helpers.RespondWithJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
+	prevData, err2 := dao.FindByID("transfers", params["id"])
+	if err2 != nil {
+		Helpers.RespondWithError(w, http.StatusBadRequest, "Invalid Transfer ID")
+		return
+	}
+
+	parsedData := prevData.(bson.M)
+
+	transfer.ID = parsedData["_id"].(bson.ObjectId)
+
+	transfer.Date = parsedData["date"].(string)
+
+	transfer.UpdateDate = time.Now().String()
+
+	if err := dao.Update("transfers", transfer.ID, transfer); err != nil {
 		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

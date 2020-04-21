@@ -79,3 +79,10 @@ func (mongo *MongoConnector) FindOneByKEY(collection string, key string, value s
 	err := db.C(collection).Find(bson.M{key: value}).One(&data)
 	return data, err
 }
+
+//FindManyByKEY with key and value specified in repository
+func (mongo *MongoConnector) FindManyByKEY(collection string, key string, value string) (interface{}, error) {
+	var data []interface{}
+	err := db.C(collection).Find(bson.M{key: value}).All(&data)
+	return data, err
+}

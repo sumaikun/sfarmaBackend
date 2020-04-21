@@ -20,6 +20,8 @@ type User struct {
 type Product struct {
 	ID                       bson.ObjectId `bson:"_id" json:"id"`
 	Name                     string        `bson:"name" json:"name"`
+	User                     bson.ObjectId `bson:"user" json:"user"`
+	State                    string        `bson:"state" json:"state"`
 	Description              string        `bson:"description" json:"description"`
 	ExternalBoxDesc          string        `bson:"externalBoxDesc" json:"externalBoxDesc"`
 	InternalBoxDesc          string        `bson:"internalBoxDesc" json:"internalBoxDesc"`
@@ -40,4 +42,13 @@ type Product struct {
 	Picture                  string        `bson:"picture" json:"picture"`
 	Date                     string        `bson:"date" json:"date"`
 	UpdateDate               string        `bson:"update_date" json:"update_date"`
+}
+
+//Transfer representation in mongo
+type Transfer struct {
+	ID         bson.ObjectId `bson:"_id" json:"id"`
+	Product    bson.ObjectId `bson:"product" json:"product"`
+	user       bson.ObjectId `bson:"user" json:"user"`
+	Date       string        `bson:"date" json:"date"`
+	UpdateDate string        `bson:"update_date" json:"update_date"`
 }

@@ -41,9 +41,9 @@ func productValidator(r *http.Request) (map[string]interface{}, Models.Product) 
 	var product Models.Product
 
 	rules := govalidator.MapData{
-		"name":        []string{"required"},
-		"category":    []string{"required", "numeric"},
-		"laboratory":  []string{"required", "numeric"},
+		"name":     []string{"required"},
+		"category": []string{"required", "numeric"},
+		//"laboratory":  []string{"required", "numeric"},
 		"description": []string{"required"},
 	}
 
@@ -61,4 +61,29 @@ func productValidator(r *http.Request) (map[string]interface{}, Models.Product) 
 	err := map[string]interface{}{"validationError": e}
 
 	return err, product
+}
+
+func transferValidator(r *http.Request) (map[string]interface{}, Models.Transfer) {
+
+	var transfer Models.Transfer
+
+	rules := govalidator.MapData{
+		"product": []string{"required"},
+		"user":    []string{"required"},
+	}
+
+	opts := govalidator.Options{
+		Request:         r,
+		Data:            &transfer,
+		Rules:           rules,
+		RequiredDefault: true,
+	}
+
+	v := govalidator.New(opts)
+	e := v.ValidateJSON()
+	//fmt.Println(user)
+
+	err := map[string]interface{}{"validationError": e}
+
+	return err, transfer
 }
