@@ -7,6 +7,33 @@ import (
 	"github.com/thedevsaddam/govalidator"
 )
 
+func signUpValidator(r *http.Request) (map[string]interface{}, Models.User) {
+
+	var user Models.User
+
+	rules := govalidator.MapData{
+		"name":       []string{"required"},
+		"email":      []string{"required", "email"},
+		"lastName":   []string{"required"},
+		"laboratory": []string{"required"},
+	}
+
+	opts := govalidator.Options{
+		Request:         r,
+		Data:            &user,
+		Rules:           rules,
+		RequiredDefault: true,
+	}
+
+	v := govalidator.New(opts)
+	e := v.ValidateJSON()
+	//fmt.Println(user)
+
+	err := map[string]interface{}{"validationError": e}
+
+	return err, user
+}
+
 func userValidator(r *http.Request) (map[string]interface{}, Models.User) {
 
 	var user Models.User

@@ -6,6 +6,7 @@ import "gopkg.in/mgo.v2/bson"
 type User struct {
 	ID         bson.ObjectId `bson:"_id" json:"id"`
 	Name       string        `bson:"name" json:"name"`
+	State      string        `bson:"state" json:"state"`
 	Password   string        `bson:"password" json:"password"`
 	Email      string        `bson:"email" json:"email"`
 	LastName   string        `bson:"lastName" json:"lastName"`

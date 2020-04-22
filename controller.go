@@ -80,6 +80,13 @@ func authentication(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	//log.Println("responseUser", response.User)
+
+	if response.User["state"] == "pending" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	// Declare the expiration time of the token
 	// here, we have kept it as 5 minutes
 	expirationTime := time.Now().Add(8 * time.Hour)
@@ -125,6 +132,38 @@ func authUserCheck(w http.ResponseWriter, r *http.Request) {
 	userParsed := user.(bson.M)
 
 	log.Println("user after context", userParsed)
+
+}
+
+func signUp(w http.ResponseWriter, r *http.Request) {
+
+	defer r.Body.Close()
+	w.Header().Set("Content-type", "application/json")
+
+	err, user := signUpValidator(r)
+
+	if len(err["validationError"].(url.Values)) > 0 {
+		//fmt.Println(len(e))
+		Helpers.RespondWithJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
+	user.ID = bson.NewObjectId()
+	user.Role = "distributors"
+	user.State = "pending"
+	user.Date = time.Now().String()
+	user.UpdateDate = time.Now().String()
+
+	if len(user.Password) != 0 {
+		user.Password, _ = Helpers.HashPassword(user.Password)
+	}
+
+	if err := dao.Insert("users", user, []string{"email"}); err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	Helpers.RespondWithJSON(w, http.StatusCreated, user)
 
 }
 

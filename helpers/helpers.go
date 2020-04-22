@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -25,7 +24,7 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 // HashPassword encrypt string for password
 func HashPassword(password string) (string, error) {
-	fmt.Println(password)
+	//fmt.Println(password)
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }

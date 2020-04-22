@@ -92,11 +92,14 @@ func main() {
 	/* Authentication */
 	router.HandleFunc("/auth", authentication).Methods("POST")
 
+	/* Sign Up */
+	router.HandleFunc("/signUp", signUp).Methods("POST")
+
 	/* enums */
 	router.Handle("/userRoles", middleware.AuthMiddleware(http.HandlerFunc(userRoles))).Methods("GET")
 
 	/* prestashop Services */
-	router.Handle("/getPrestaShopDistributors", middleware.AuthMiddleware(http.HandlerFunc(getPrestaShopDistributors))).Methods("GET")
+	router.HandleFunc("/getPrestaShopDistributors", getPrestaShopDistributors).Methods("GET")
 	router.Handle("/getPrestaShopProductcategories", middleware.AuthMiddleware(http.HandlerFunc(getPrestaShopProductcategories))).Methods("GET")
 	//router.HandleFunc("/testCreateProduct", testCreateProduct).Methods("GET")
 	//router.HandleFunc("/testAddFile", testAddFile).Methods("GET")
