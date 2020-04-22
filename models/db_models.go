@@ -48,7 +48,10 @@ type Product struct {
 type Transfer struct {
 	ID         bson.ObjectId `bson:"_id" json:"id"`
 	Product    bson.ObjectId `bson:"product" json:"product"`
-	user       bson.ObjectId `bson:"user" json:"user"`
+	User       bson.ObjectId `bson:"user" json:"user"`
+	Reference  string        `bson:"reference" json:"reference"`
+	Price      string        `bson:"price" json:"price"`
+	ProductID  string        `bson:"productID" json:"productID"`
 	Date       string        `bson:"date" json:"date"`
 	UpdateDate string        `bson:"update_date" json:"update_date"`
 }

@@ -21,6 +21,14 @@ var (
 
 var dao = Dao.MongoConnector{}
 
+//xml as string
+
+func returnXML(reference string, price string, category string, description string, name string) string {
+	var xml = "<?xml version='1.0' encoding='UTF-8'?><prestashop xmlns:xlink='http://www.w3.org/1999/xlink'><product><type notFilterable='true'>simple</type><reference>" + reference + "</reference><price>" + price + "</price><active>1</active><state>1</state><id_type_redirected>0</id_type_redirected><available_for_order>1</available_for_order><id_category_default xlink:href='https://sfarmadroguerias.com/api/categories/" + category + "'>" + category + "</id_category_default><condition>new</condition><show_price>1</show_price><indexed>1</indexed><visibility>both</visibility><meta_description><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + description + "</language></meta_description><meta_keywords><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>Farmacia, online, droguería, Bogotá, Colombia, Domicilio, complemento, suplemento, dieta, niños</language></meta_keywords><meta_title><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></meta_title><link_rewrite><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></link_rewrite><name><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></name><description><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + description + "</language></description><associations><categories nodeType='category' api='categories'><category xlink:href='https://sfarmadroguerias.com/api/categories/" + category + "'><id>" + category + "</id></category></categories></associations></product></prestashop>"
+
+	return xml
+}
+
 //Dynamic types
 
 var typeRegistry = make(map[string]reflect.Type)
@@ -90,6 +98,9 @@ func main() {
 	/* prestashop Services */
 	router.Handle("/getPrestaShopDistributors", middleware.AuthMiddleware(http.HandlerFunc(getPrestaShopDistributors))).Methods("GET")
 	router.Handle("/getPrestaShopProductcategories", middleware.AuthMiddleware(http.HandlerFunc(getPrestaShopProductcategories))).Methods("GET")
+	//router.HandleFunc("/testCreateProduct", testCreateProduct).Methods("GET")
+	//router.HandleFunc("/testAddFile", testAddFile).Methods("GET")
+	router.Handle("/createPrestaShopProduct", middleware.UserMiddleware(middleware.OnlyAdminMiddleware(middleware.AuthMiddleware(http.HandlerFunc(createPrestaShopProduct))))).Methods("POST")
 
 	/* Users Routes */
 	router.Handle("/users", middleware.AuthMiddleware(middleware.UserMiddleware(middleware.OnlyAdminMiddleware(http.HandlerFunc(createUsersEndPoint))))).Methods("POST")
@@ -103,7 +114,11 @@ func main() {
 	router.Handle("/products", middleware.AuthMiddleware(middleware.UserMiddleware(http.HandlerFunc(allProductsEndPoint)))).Methods("GET")
 	router.Handle("/products/{id}", middleware.AuthMiddleware(http.HandlerFunc(findProductEndpoint))).Methods("GET")
 	router.Handle("/products/{id}", middleware.AuthMiddleware(http.HandlerFunc(removeProductEndpoint))).Methods("DELETE")
-	router.Handle("/products/{id}", middleware.AuthMiddleware(http.HandlerFunc(updateProductEndPoint))).Methods("PUT")
+	router.Handle("/products/{id}", middleware.AuthMiddleware(middleware.UserMiddleware(http.HandlerFunc(updateProductEndPoint)))).Methods("PUT")
+
+	/* Transfer Routes  */
+
+	router.Handle("/transfers", middleware.AuthMiddleware(middleware.UserMiddleware(middleware.OnlyAdminMiddleware(http.HandlerFunc(allTransfersEndPoint))))).Methods("GET")
 
 	/* fileUpload */
 

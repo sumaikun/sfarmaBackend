@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -127,6 +129,187 @@ func authUserCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 // ----------Prestashop Integration ----------------------------------------
+
+/*
+func testCreateProduct(w http.ResponseWriter, r *http.Request) {
+
+	xml := returnXML()
+
+	var xmlStr = []byte(xml)
+
+	req, err := http.NewRequest("POST", "https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV", bytes.NewBuffer(xmlStr))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	req.Header.Set("Content-Type", "application/xml")
+	req.Header.Set("Output-Format", "JSON")
+
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var result map[string]interface{}
+
+	json.NewDecoder(response.Body).Decode(&result)
+
+
+	product, _ := result["product"].(map[string]interface{})
+
+	log.Println("product id", product["id"])
+
+}*/
+
+func testAddFile(filename string, productID string) {
+
+	// Open the file
+	file, err := os.Open("./files/" + filename)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	// Close the file later
+	defer file.Close()
+
+	log.Println(file)
+
+	// Buffer to store our request body as bytes
+	var requestBody bytes.Buffer
+
+	// Create a multipart writer
+	multiPartWriter := multipart.NewWriter(&requestBody)
+
+	// Initialize the file field
+	fileWriter, err := multiPartWriter.CreateFormFile("image", filename)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Copy the actual file content to the field field's writer
+	_, err = io.Copy(fileWriter, file)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	multiPartWriter.Close()
+
+	req, err := http.NewRequest("POST", "https://sfarmadroguerias.com/api/images/products/"+productID+"?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV", &requestBody)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	// We need to set the content type from the writer, it includes necessary boundary as well
+	req.Header.Set("Content-Type", multiPartWriter.FormDataContentType())
+
+	// Do the request
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var result map[string]interface{}
+
+	json.NewDecoder(response.Body).Decode(&result)
+
+	log.Println(result)
+}
+
+func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("prestashop product")
+
+	var createProduct Models.CreateProduct
+	// Get the JSON body and decode into credentials
+	err := json.NewDecoder(r.Body).Decode(&createProduct)
+
+	if err != nil {
+		// If the structure of the body is wrong, return an HTTP error
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	log.Println(createProduct)
+
+	product, err := dao.FindByID("products", createProduct.Product)
+	if err != nil {
+		Helpers.RespondWithError(w, http.StatusBadRequest, "Invalid Product ID")
+		return
+	}
+
+	//log.Println(product)
+
+	parsedProduct := product.(bson.M)
+
+	if parsedProduct["state"] == "sended" {
+		Helpers.RespondWithError(w, http.StatusBadRequest, "Product Already Sended")
+		return
+	}
+
+	if parsedProduct["picture"] == "" {
+		Helpers.RespondWithError(w, http.StatusBadRequest, "Product Need Image")
+		return
+	}
+
+	xml := returnXML(createProduct.Reference, createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
+
+	//log.Println("xml", xml)
+
+	var xmlStr = []byte(xml)
+
+	req, err := http.NewRequest("POST", "https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV", bytes.NewBuffer(xmlStr))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	req.Header.Set("Content-Type", "application/xml")
+	req.Header.Set("Output-Format", "JSON")
+
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var result map[string]interface{}
+
+	json.NewDecoder(response.Body).Decode(&result)
+
+	productG, _ := result["product"].(map[string]interface{})
+
+	log.Println("PRESTASHOP product id generated", productG["id"])
+
+	user := context.Get(r, "user")
+
+	userParsed := user.(bson.M)
+
+	var transfer Models.Transfer
+	transfer.ID = bson.NewObjectId()
+	transfer.Product = bson.ObjectIdHex(createProduct.Product)
+	transfer.User = userParsed["_id"].(bson.ObjectId)
+	transfer.Reference = createProduct.Reference
+	transfer.Price = createProduct.Price
+	transfer.ProductID = productG["id"].(string)
+	transfer.Date = time.Now().String()
+	transfer.UpdateDate = time.Now().String()
+
+	if err := dao.Insert("transfers", transfer, nil); err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	go testAddFile(parsedProduct["picture"].(string), productG["id"].(string))
+
+	parsedProduct["state"] = "sended"
+
+	if err := dao.Update("products", parsedProduct["_id"], parsedProduct); err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	Helpers.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+
+}
 
 func getAllRequest(url string) map[string][]interface{} {
 	// By now our original request body should have been populated, so let's just use it with our custom request
@@ -521,6 +704,14 @@ func updateProductEndPoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	parsedData := prevData.(bson.M)
+
+	if parsedData["user"] == nil {
+		user := context.Get(r, "user")
+
+		userParsed := user.(bson.M)
+
+		product.User = userParsed["_id"].(bson.ObjectId)
+	}
 
 	product.ID = parsedData["_id"].(bson.ObjectId)
 
