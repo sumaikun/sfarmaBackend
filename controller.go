@@ -675,8 +675,10 @@ func createProductEndPoint(w http.ResponseWriter, r *http.Request) {
 
 	userParsed := user.(bson.M)
 
+	product.User = userParsed["_id"].(bson.ObjectId)
+
 	if userParsed["role"] != "admin" {
-		product.User = userParsed["_id"].(bson.ObjectId)
+
 		product.Laboratory = strconv.Itoa(userParsed["laboratory"].(int))
 		if err := dao.Insert("products", product, []string{"name"}); err != nil {
 			Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
@@ -744,12 +746,15 @@ func updateProductEndPoint(w http.ResponseWriter, r *http.Request) {
 
 	parsedData := prevData.(bson.M)
 
-	if parsedData["user"] == nil {
-		user := context.Get(r, "user")
+	user := context.Get(r, "user")
 
-		userParsed := user.(bson.M)
+	userParsed := user.(bson.M)
+
+	if parsedData["user"] == nil {
 
 		product.User = userParsed["_id"].(bson.ObjectId)
+	} else {
+		product.User = parsedData["user"].(bson.ObjectId)
 	}
 
 	product.ID = parsedData["_id"].(bson.ObjectId)
