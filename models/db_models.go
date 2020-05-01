@@ -26,6 +26,7 @@ type Product struct {
 	Description              string        `bson:"description" json:"description"`
 	ExternalBoxDesc          string        `bson:"externalBoxDesc" json:"externalBoxDesc"`
 	InternalBoxDesc          string        `bson:"internalBoxDesc" json:"internalBoxDesc"`
+	SubClassification        string        `bson:"subClassification" json:"subClassification"`
 	CodeCopidrogas           string        `bson:"codeCopidrogas" json:"codeCopidrogas"`
 	InternalManufacturerCode string        `bson:"internalManufacturerCode" json:"internalManufacturerCode"`
 	MedicineType             string        `bson:"medicineType" json:"medicineType"`
@@ -41,6 +42,16 @@ type Product struct {
 	AdministrationWay        string        `bson:"administrationWay" json:"administrationWay"`
 	Category                 string        `bson:"category" json:"category"`
 	Picture                  string        `bson:"picture" json:"picture"`
+	Picture2                 string        `bson:"picture2" json:"picture2"`
+	Picture3                 string        `bson:"picture3" json:"picture3"`
+	CustomerBenefit          string        `bson:"customerBenefit" json:"customerBenefit"`
+	PrepakCondition          string        `bson:"prepakCondition" json:"prepakCondition"`
+	SustanceCompose          string        `bson:"sustanceCompose" json:"sustanceCompose"`
+	RegisterInvima           string        `bson:"registerInvima" json:"registerInvima"`
+	BarCodeRegular           string        `bson:"barCodeRegular" json:"barCodeRegular"`
+	AmountByReference        string        `bson:"amountByReference" json:"amountByReference"`
+	ShooperClassification    interface{}   `bson:"shooperClassification" json:"shooperClassification"`
+	MarketSegment            interface{}   `bson:"marketSegment" json:"marketSegment"`
 	Date                     string        `bson:"date" json:"date"`
 	UpdateDate               string        `bson:"update_date" json:"update_date"`
 }
