@@ -91,6 +91,7 @@ func main() {
 
 	/* Authentication */
 	router.HandleFunc("/auth", authentication).Methods("POST")
+	router.HandleFunc("/updateConditions/{id}", updateConditions).Methods("GET")
 
 	/* Sign Up */
 	router.HandleFunc("/signUp", signUp).Methods("POST")

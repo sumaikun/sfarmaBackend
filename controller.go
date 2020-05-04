@@ -72,7 +72,7 @@ func authentication(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			//log.Println("user found login", user)
+			log.Println("user found login", user)
 
 			response.User = user.(bson.M)
 
@@ -133,6 +133,29 @@ func authUserCheck(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("user after context", userParsed)
 
+}
+
+func updateConditions(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+
+	user, err := dao.FindByID("users", params["id"])
+
+	if err != nil {
+		Helpers.RespondWithError(w, http.StatusBadRequest, "Invalid User ID")
+		return
+	}
+
+	parsedData := user.(bson.M)
+
+	parsedData["conditions"] = true
+
+	if err := dao.Update("users", parsedData["_id"].(bson.ObjectId), parsedData); err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	Helpers.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
 func signUp(w http.ResponseWriter, r *http.Request) {

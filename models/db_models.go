@@ -4,17 +4,19 @@ import "gopkg.in/mgo.v2/bson"
 
 //User representation on mongo
 type User struct {
-	ID         bson.ObjectId `bson:"_id" json:"id"`
-	Name       string        `bson:"name" json:"name"`
-	State      string        `bson:"state" json:"state"`
-	Password   string        `bson:"password" json:"password"`
-	Email      string        `bson:"email" json:"email"`
-	LastName   string        `bson:"lastName" json:"lastName"`
-	Role       string        `bson:"role" json:"role"`
-	Laboratory int           `bson:"laboratory" json:"laboratory"`
-	Picture    string        `bson:"picture" json:"picture"`
-	Date       string        `bson:"date" json:"date"`
-	UpdateDate string        `bson:"update_date" json:"update_date"`
+	ID            bson.ObjectId `bson:"_id" json:"id"`
+	Name          string        `bson:"name" json:"name"`
+	State         string        `bson:"state" json:"state"`
+	Password      string        `bson:"password" json:"password"`
+	Email         string        `bson:"email" json:"email"`
+	LastName      string        `bson:"lastName" json:"lastName"`
+	Role          string        `bson:"role" json:"role"`
+	Laboratory    int           `bson:"laboratory" json:"laboratory"`
+	Picture       string        `bson:"picture" json:"picture"`
+	ResetPassword bool          `bson:"resetPassword" json:"resetPassword"`
+	Conditions    bool          `bson:"conditions" json:"conditions"`
+	Date          string        `bson:"date" json:"date"`
+	UpdateDate    string        `bson:"update_date" json:"update_date"`
 }
 
 //Product representation on mongo
@@ -52,6 +54,7 @@ type Product struct {
 	AmountByReference        string        `bson:"amountByReference" json:"amountByReference"`
 	ShooperClassification    interface{}   `bson:"shooperClassification" json:"shooperClassification"`
 	MarketSegment            interface{}   `bson:"marketSegment" json:"marketSegment"`
+	RejectJutification       string        `bson:"rejectJutification" json:"rejectJutification"`
 	Date                     string        `bson:"date" json:"date"`
 	UpdateDate               string        `bson:"update_date" json:"update_date"`
 }
