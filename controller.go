@@ -314,7 +314,7 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	xml := returnXML(createProduct.Reference, createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
+	xml := returnXML(createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
 
 	//log.Println("xml", xml)
 
@@ -362,6 +362,14 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go testAddFile(parsedProduct["picture"].(string), productG["id"].(string))
+
+	if len(parsedProduct["picture2"].(string)) != 0 {
+		go testAddFile(parsedProduct["picture2"].(string), productG["id"].(string))
+	}
+
+	if len(parsedProduct["picture3"].(string)) != 0 {
+		go testAddFile(parsedProduct["picture3"].(string), productG["id"].(string))
+	}
 
 	parsedProduct["state"] = "sended"
 
