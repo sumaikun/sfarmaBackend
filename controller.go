@@ -982,6 +982,28 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func downloadFormat(w http.ResponseWriter, r *http.Request) {
+
+	format, err := os.Open("./format/importFormat.csv")
+
+	if err != nil {
+		//log.Fatal(err) // perhaps handle this nicer
+		Helpers.RespondWithJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer format.Close()
+
+	w.Header().Set("Content-Type", "text/csv") // <-- set the content-type header
+
+	w.Header().Set("Content-Disposition: attachment", "filename=format.csv")
+
+	// Write the body to file
+	_, err = io.Copy(w, format)
+}
+
+//Others
+
 func readCsv() {
 	csvfile, err := os.Open("input.csv")
 	if err != nil {
@@ -1004,4 +1026,31 @@ func readCsv() {
 		}
 		fmt.Printf("Question: %s Answer %s\n", record[0], record[1])
 	}
+}
+
+func massiveUpload(w http.ResponseWriter, r *http.Request) {
+
+	var products []Models.Product
+
+	defer r.Body.Close()
+	log.Println(r.Body)
+
+	user := context.Get(r, "user")
+
+	log.Println("user", user)
+
+	err := json.NewDecoder(r.Body).Decode(&products)
+
+	if err != nil {
+		log.Println(err)
+		// If the structure of the body is wrong, return an HTTP error
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	for _, element := range products {
+		log.Println("element", element)
+	}
+
+	Helpers.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "ok"})
 }

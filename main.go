@@ -85,6 +85,7 @@ func init() {
 }
 
 func main() {
+
 	//initEvents()
 	fmt.Println("start server in port " + port)
 	router := mux.NewRouter().StrictSlash(true)
@@ -128,6 +129,11 @@ func main() {
 
 	router.Handle("/fileUpload", middleware.AuthMiddleware(http.HandlerFunc(fileUpload))).Methods("POST")
 	router.HandleFunc("/serveImage/{image}", serveImage).Methods("GET")
+
+	/* excel format */
+
+	router.Handle("/downloadFormat", middleware.AuthMiddleware(http.HandlerFunc(downloadFormat))).Methods("GET")
+	router.Handle("/massiveUpload", middleware.AuthMiddleware(middleware.UserMiddleware(http.HandlerFunc(massiveUpload)))).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":"+port, &CORSRouterDecorator{router}))
 
