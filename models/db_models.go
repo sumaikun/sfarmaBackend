@@ -23,7 +23,7 @@ type User struct {
 type Product struct {
 	ID                       bson.ObjectId `bson:"_id" json:"id"`
 	Name                     string        `bson:"name" json:"name"`
-	User                     bson.ObjectId `bson:"user" json:"user"`
+	User                     bson.ObjectId `bson:"user,omitempty" json:"user,omitempty"`
 	State                    string        `bson:"state" json:"state"`
 	Description              string        `bson:"description" json:"description"`
 	ExternalBoxDesc          string        `bson:"externalBoxDesc" json:"externalBoxDesc"`

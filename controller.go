@@ -644,7 +644,7 @@ func proccessPrestashopProducts() {
 							}
 						}
 
-						fmt.Println("localProduct", localProduct)
+						//fmt.Println("localProduct", localProduct)
 					}
 				}
 
