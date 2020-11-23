@@ -58,6 +58,7 @@ type Product struct {
 	RecommendedPrice         string        `bson:"recommendedPrice" json:"recommendedPrice"`
 	ShopDefaultReference     string        `bson:"shopDefaultReference" json:"shopDefaultReference"`
 	PrestashopID             string        `bson:"prestashopId" json:"prestashopId"`
+	DefaultImageID           string        `bson:"defaultImageID" json:"defaultImageID"`
 	Date                     string        `bson:"date" json:"date"`
 	UpdateDate               string        `bson:"update_date" json:"update_date"`
 }

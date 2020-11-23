@@ -87,7 +87,7 @@ func init() {
 
 func main() {
 
-	go proccessPrestashopProducts()
+	go proccessPrestaShopDistributors()
 
 	go proccessPrestashopSuppliers()
 
@@ -97,7 +97,7 @@ func main() {
 	//c.AddFunc("*/5 * * * *", func() {
 	c.AddFunc("0 * * * *", func() {
 		fmt.Println("Executed each hour")
-		go proccessPrestashopProducts()
+		go proccessPrestaShopDistributors()
 
 		go proccessPrestashopSuppliers()
 

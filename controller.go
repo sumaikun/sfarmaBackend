@@ -618,6 +618,7 @@ func proccessPrestashopProducts() {
 						prestaShopID := int(md["id"].(float64))
 						localProduct.PrestashopID = strconv.Itoa(prestaShopID)
 						localProduct.Date = time.Now().String()
+						localProduct.DefaultImageID = md["id_default_image"].(string)
 						//xml := returnXML(createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
 
 						exists, err := dao.FindManyByKEY("products", "prestashopId", strconv.Itoa(prestaShopID))
@@ -628,14 +629,14 @@ func proccessPrestashopProducts() {
 						//fmt.Println("len", len(exists.([]interface{})))
 
 						if len(exists.([]interface{})) == 0 {
-							fmt.Println("product not exist")
+							//fmt.Println("product not exist")
 							localProduct.ID = bson.NewObjectId()
 							if err := dao.Insert("products", localProduct, nil); err != nil {
 								fmt.Println(err)
 								return
 							}
 						} else {
-							fmt.Println("product exist")
+							//fmt.Println("product exist")
 							parsedExist := exists.([]interface{})[0].(bson.M)
 							localProduct.ID = parsedExist["_id"].(bson.ObjectId)
 							if err := dao.Update("products", localProduct.ID, localProduct); err != nil {
