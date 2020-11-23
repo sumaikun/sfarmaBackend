@@ -55,6 +55,9 @@ type Product struct {
 	ShooperClassification    interface{}   `bson:"shooperClassification" json:"shooperClassification"`
 	MarketSegment            interface{}   `bson:"marketSegment" json:"marketSegment"`
 	RejectJutification       string        `bson:"rejectJutification" json:"rejectJutification"`
+	RecommendedPrice         string        `bson:"recommendedPrice" json:"recommendedPrice"`
+	ShopDefaultReference     string        `bson:"shopDefaultReference" json:"shopDefaultReference"`
+	PrestashopID             string        `bson:"prestashopId" json:"prestashopId"`
 	Date                     string        `bson:"date" json:"date"`
 	UpdateDate               string        `bson:"update_date" json:"update_date"`
 }
@@ -69,4 +72,20 @@ type Transfer struct {
 	ProductID  string        `bson:"productID" json:"productID"`
 	Date       string        `bson:"date" json:"date"`
 	UpdateDate string        `bson:"update_date" json:"update_date"`
+}
+
+//Laboratories representation in mongo
+type Laboratories struct {
+	ID           bson.ObjectId `bson:"_id" json:"id"`
+	PrestashopID string        `bson:"prestashopId" json:"prestashopId"`
+	Name         string        `bson:"name" json:"name"`
+	Date         string        `bson:"date" json:"date"`
+}
+
+//Suppliers representation in mongo
+type Suppliers struct {
+	ID           bson.ObjectId `bson:"_id" json:"id"`
+	PrestashopID string        `bson:"prestashopId" json:"prestashopId"`
+	Name         string        `bson:"name" json:"name"`
+	Date         string        `bson:"date" json:"date"`
 }

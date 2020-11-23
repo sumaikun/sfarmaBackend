@@ -434,27 +434,19 @@ func getRequest(url string) map[string]interface{} {
 
 }
 
-func getPrestaShopDistributors(w http.ResponseWriter, r *http.Request) {
-
-	defer r.Body.Close()
+func proccessPrestaShopDistributors() {
 
 	result := getAllRequest("https://sfarmadroguerias.com/api/manufacturers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
-
-	//log.Println(result)
 
 	var slice []interface{}
 
 	for _, element := range result["manufacturers"] {
-		//fmt.Println("Key:", key, "=>", "Element:", element)
+
 		md, _ := element.(map[string]interface{})
-		//fmt.Println(md)
-		//fmt.Println(md["id"])
+
 		subelement := constructDistributors(fmt.Sprintf("%g", md["id"]))
 
-		//fmt.Println(subelement["active"])
-
 		if subelement["active"] == "1" {
-			//fmt.Println(subelement)
 			slice = append(slice, subelement)
 		}
 
@@ -462,7 +454,72 @@ func getPrestaShopDistributors(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Println("Slice Result ", slice)
 
-	Helpers.RespondWithJSON(w, http.StatusOK, slice)
+	for _, element := range slice {
+		//fmt.Println("Key:", key, "=>", "Element:", element)
+
+		var laboratory Models.Laboratories
+
+		parsedElm := element.(map[string]interface{})
+
+		if parsedElm["active"] == "1" {
+
+			//fmt.Println(parsedElm["id"], int(parsedElm["id"].(float64)))
+
+			prestaShopID := int(parsedElm["id"].(float64))
+
+			//fmt.Println(strconv.Itoa(prestaShopID), string(prestaShopID))
+
+			laboratory.PrestashopID = strconv.Itoa(prestaShopID)
+
+			laboratory.Name = parsedElm["name"].(string)
+
+			laboratory.Date = time.Now().String()
+
+			exists, err := dao.FindManyByKEY("laboratories", "prestashopId", strconv.Itoa(prestaShopID))
+			if err != nil {
+				return
+			}
+
+			//fmt.Println("len", len(exists.([]interface{})))
+
+			if len(exists.([]interface{})) == 0 {
+				//fmt.Println("laboratory not exist")
+				laboratory.ID = bson.NewObjectId()
+				if err := dao.Insert("laboratories", laboratory, nil); err != nil {
+					fmt.Println(err)
+					return
+				}
+			} else {
+				//fmt.Println("laboratory exist")
+				parsedExist := exists.([]interface{})[0].(bson.M)
+				laboratory.ID = parsedExist["_id"].(bson.ObjectId)
+				if err := dao.Update("laboratories", laboratory.ID, laboratory); err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+
+			//fmt.Println(laboratory)
+
+		}
+
+	}
+
+}
+
+func getPrestaShopDistributors(w http.ResponseWriter, r *http.Request) {
+
+	defer r.Body.Close()
+
+	w.Header().Set("Content-type", "application/json")
+
+	laboratories, err := dao.FindAll("laboratories")
+	if err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	Helpers.RespondWithJSON(w, http.StatusOK, laboratories)
 
 }
 
@@ -528,6 +585,132 @@ func constructCategory(id string) map[string]interface{} {
 	//fmt.Println("Key:", manufacturer["id"], "=>", "Element:", manufacturer["name"], " ", "active", manufacturer["active"])
 
 	return category
+}
+
+// Get products from prestashop
+
+func proccessPrestashopProducts() {
+
+	result := getAllRequest("https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[id,name,reference,price,id_manufacturer,description,id_category_default,id_default_image,active,id_supplier]&output_format=JSON")
+
+	for _, element := range result["products"] {
+		md, _ := element.(map[string]interface{})
+		//fmt.Println("Key:", key, "=>", "Element:", md["name"])
+		if md["active"] == "1" {
+
+			if md["id_manufacturer"] == "0" && md["id_supplier"] != "0" {
+				//fmt.Println("supplier", md)
+				supplier, _ := dao.FindOneByKEY("suppliers", "prestashopId", md["id_supplier"].(string))
+				//fmt.Println("supplier", supplier)
+				if supplier != nil {
+					parsedSupplier := supplier.(bson.M)
+					manufacturer, _ := dao.FindOneLikeKEY("laboratories", "name", parsedSupplier["name"].(string))
+					if manufacturer != nil {
+						parsedManufacturer := manufacturer.(bson.M)
+						var localProduct Models.Product
+						localProduct.Name = md["name"].(string)
+						localProduct.Category = md["id_category_default"].(string)
+						localProduct.Description = md["description"].(string)
+						localProduct.Laboratory = parsedManufacturer["prestashopId"].(string)
+						localProduct.RecommendedPrice = md["price"].(string)
+						localProduct.ShopDefaultReference = md["reference"].(string)
+						localProduct.State = "inShop"
+						prestaShopID := int(md["id"].(float64))
+						localProduct.PrestashopID = strconv.Itoa(prestaShopID)
+						localProduct.Date = time.Now().String()
+						//xml := returnXML(createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
+
+						exists, err := dao.FindManyByKEY("products", "prestashopId", strconv.Itoa(prestaShopID))
+						if err != nil {
+							return
+						}
+
+						//fmt.Println("len", len(exists.([]interface{})))
+
+						if len(exists.([]interface{})) == 0 {
+							fmt.Println("product not exist")
+							localProduct.ID = bson.NewObjectId()
+							if err := dao.Insert("products", localProduct, nil); err != nil {
+								fmt.Println(err)
+								return
+							}
+						} else {
+							fmt.Println("product exist")
+							parsedExist := exists.([]interface{})[0].(bson.M)
+							localProduct.ID = parsedExist["_id"].(bson.ObjectId)
+							if err := dao.Update("products", localProduct.ID, localProduct); err != nil {
+								fmt.Println(err)
+								return
+							}
+						}
+
+						fmt.Println("localProduct", localProduct)
+					}
+				}
+
+			}
+		}
+
+	}
+
+}
+
+// Get suppliers from prestashop
+
+func proccessPrestashopSuppliers() {
+
+	result := getAllRequest("https://sfarmadroguerias.com/api/suppliers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&output_format=JSON&display=[id,name,active]")
+
+	var supplier Models.Suppliers
+
+	for _, element := range result["suppliers"] {
+		md, _ := element.(map[string]interface{})
+		//fmt.Println("Key:", key, "=>", "Element:", md)
+
+		if md["active"] == "1" {
+
+			//fmt.Println(parsedElm["id"], int(parsedElm["id"].(float64)))
+
+			prestaShopID := int(md["id"].(float64))
+
+			//fmt.Println(strconv.Itoa(prestaShopID), string(prestaShopID))
+
+			supplier.PrestashopID = strconv.Itoa(prestaShopID)
+
+			supplier.Name = md["name"].(string)
+
+			supplier.Date = time.Now().String()
+
+			exists, err := dao.FindManyByKEY("suppliers", "prestashopId", strconv.Itoa(prestaShopID))
+			if err != nil {
+				return
+			}
+
+			//fmt.Println("len", len(exists.([]interface{})))
+
+			if len(exists.([]interface{})) == 0 {
+				//fmt.Println("supplier not exist")
+				supplier.ID = bson.NewObjectId()
+				if err := dao.Insert("suppliers", supplier, nil); err != nil {
+					fmt.Println(err)
+					return
+				}
+			} else {
+				//fmt.Println("supplier exist")
+				parsedExist := exists.([]interface{})[0].(bson.M)
+				supplier.ID = parsedExist["_id"].(bson.ObjectId)
+				if err := dao.Update("suppliers", supplier.ID, supplier); err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+
+			//fmt.Println(laboratory)
+
+		}
+
+	}
+
 }
 
 // Enums --------------------------------------------------------------------

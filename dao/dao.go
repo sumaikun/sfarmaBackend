@@ -86,3 +86,10 @@ func (mongo *MongoConnector) FindManyByKEY(collection string, key string, value 
 	err := db.C(collection).Find(bson.M{key: value}).All(&data)
 	return data, err
 }
+
+//FindOneLikeKEY with key and value specified in repository
+func (mongo *MongoConnector) FindOneLikeKEY(collection string, key string, value string) (interface{}, error) {
+	var data interface{}
+	err := db.C(collection).Find(bson.M{key: bson.RegEx{value + ".*", ""}}).One(&data)
+	return data, err
+}

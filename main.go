@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/gorilla/mux"
+	"github.com/robfig/cron"
 
 	Config "github.com/sumaikun/sfarma-rest-api/config"
 	middleware "github.com/sumaikun/sfarma-rest-api/middlewares"
@@ -85,6 +86,24 @@ func init() {
 }
 
 func main() {
+
+	go proccessPrestashopProducts()
+
+	go proccessPrestashopSuppliers()
+
+	go proccessPrestashopProducts()
+
+	c := cron.New()
+	//c.AddFunc("*/5 * * * *", func() {
+	c.AddFunc("0 * * * *", func() {
+		fmt.Println("Executed each hour")
+		go proccessPrestashopProducts()
+
+		go proccessPrestashopSuppliers()
+
+		go proccessPrestashopProducts()
+	})
+	c.Start()
 
 	//initEvents()
 	fmt.Println("start server in port " + port)
