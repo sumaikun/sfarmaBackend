@@ -537,38 +537,75 @@ func constructDistributors(id string) map[string]interface{} {
 
 }
 
+func proccessPrestaShopProductcategories() {
+
+	result := getAllRequest("https://sfarmadroguerias.com/api/categories?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&output_format=JSON&display=[id,name,active]")
+	//fmt.Println("Key:", key, "=>", "Element:", element)
+	var category Models.Categories
+
+	for _, element := range result["categories"] {
+		md, _ := element.(map[string]interface{})
+		//fmt.Println("Key:", key, "=>", "Element:", md)
+
+		if md["active"] == "1" {
+
+			//fmt.Println(parsedElm["id"], int(parsedElm["id"].(float64)))
+
+			prestaShopID := int(md["id"].(float64))
+
+			//fmt.Println(strconv.Itoa(prestaShopID), string(prestaShopID))
+
+			category.PrestashopID = strconv.Itoa(prestaShopID)
+
+			category.Name = md["name"].(string)
+
+			category.Date = time.Now().String()
+
+			exists, err := dao.FindManyByKEY("categories", "prestashopId", strconv.Itoa(prestaShopID))
+			if err != nil {
+				return
+			}
+
+			//fmt.Println("len", len(exists.([]interface{})))
+
+			if len(exists.([]interface{})) == 0 {
+				//fmt.Println("supplier not exist")
+				category.ID = bson.NewObjectId()
+				if err := dao.Insert("categories", category, nil); err != nil {
+					fmt.Println(err)
+					return
+				}
+			} else {
+				//fmt.Println("supplier exist")
+				parsedExist := exists.([]interface{})[0].(bson.M)
+				category.ID = parsedExist["_id"].(bson.ObjectId)
+				if err := dao.Update("categories", category.ID, category); err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+
+			//fmt.Println(laboratory)
+
+		}
+
+	}
+
+}
+
 func getPrestaShopProductcategories(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	result := getRequest("https://sfarmadroguerias.com/api/categories/2?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
+	w.Header().Set("Content-type", "application/json")
 
-	category, _ := result["category"].(map[string]interface{})
-
-	//fmt.Println(category["associations"])
-
-	categories := category["associations"].(map[string]interface{})
-
-	//fmt.Println(categories["categories"])
-
-	selectedCategories := categories["categories"].([]interface{})
-
-	var slice []interface{}
-
-	for _, element := range selectedCategories {
-		//fmt.Println(element)
-		md, _ := element.(map[string]interface{})
-
-		//fmt.Println(md["id"])
-		subelement := constructCategory(md["id"].(string))
-		//fmt.Println(subelement)
-		if subelement["active"] == "1" {
-			//fmt.Println(subelement)
-			slice = append(slice, subelement)
-		}
+	categories, err := dao.FindAll("categories")
+	if err != nil {
+		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	Helpers.RespondWithJSON(w, http.StatusOK, slice)
+	Helpers.RespondWithJSON(w, http.StatusOK, categories)
 
 }
 

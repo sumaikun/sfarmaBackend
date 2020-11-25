@@ -93,6 +93,8 @@ func main() {
 
 	go proccessPrestashopProducts()
 
+	go proccessPrestaShopProductcategories()
+
 	c := cron.New()
 	//c.AddFunc("*/5 * * * *", func() {
 	c.AddFunc("0 * * * *", func() {
@@ -102,6 +104,8 @@ func main() {
 		go proccessPrestashopSuppliers()
 
 		go proccessPrestashopProducts()
+
+		go proccessPrestaShopProductcategories()
 	})
 	c.Start()
 

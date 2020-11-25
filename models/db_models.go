@@ -90,3 +90,11 @@ type Suppliers struct {
 	Name         string        `bson:"name" json:"name"`
 	Date         string        `bson:"date" json:"date"`
 }
+
+//Categories representation in mongo
+type Categories struct {
+	ID           bson.ObjectId `bson:"_id" json:"id"`
+	PrestashopID string        `bson:"prestashopId" json:"prestashopId"`
+	Name         string        `bson:"name" json:"name"`
+	Date         string        `bson:"date" json:"date"`
+}
