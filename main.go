@@ -8,11 +8,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/robfig/cron"
+	"github.com/thedevsaddam/govalidator"
 
 	Config "github.com/sumaikun/sfarma-rest-api/config"
 	middleware "github.com/sumaikun/sfarma-rest-api/middlewares"
 
 	Dao "github.com/sumaikun/sfarma-rest-api/dao"
+
+	Helpers "github.com/sumaikun/sfarma-rest-api/helpers"
 )
 
 var (
@@ -24,8 +27,14 @@ var dao = Dao.MongoConnector{}
 
 //xml as string
 
-func returnXML(reference string, manufacturer string, price string, category string, description string, name string) string {
-	var xml = "<?xml version='1.0' encoding='UTF-8'?><prestashop xmlns:xlink='http://www.w3.org/1999/xlink'><product><type notFilterable='true'>simple</type><reference>" + reference + "</reference><id_manufacturer>" + manufacturer + "</id_manufacturer><price>" + price + "</price><active>1</active><state>1</state><id_type_redirected>0</id_type_redirected><available_for_order>1</available_for_order><id_category_default xlink:href='https://sfarmadroguerias.com/api/categories/" + category + "'>" + category + "</id_category_default><condition>new</condition><show_price>1</show_price><indexed>1</indexed><visibility>both</visibility><meta_description><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + description + "</language></meta_description><meta_keywords><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>Farmacia, online, droguería, Bogotá, Colombia, Domicilio, complemento, suplemento, dieta, niños</language></meta_keywords><meta_title><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></meta_title><link_rewrite><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></link_rewrite><name><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></name><description><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + description + "</language></description><associations><categories nodeType='category' api='categories'><category xlink:href='https://sfarmadroguerias.com/api/categories/" + category + "'><id>" + category + "</id></category></categories></associations></product></prestashop>"
+func returnXML(id string, reference string, manufacturer string, price string, category string, description string, name string) string {
+	var xml string
+
+	if len(id) == 0 {
+		xml = "<?xml version='1.0' encoding='UTF-8'?><prestashop xmlns:xlink='http://www.w3.org/1999/xlink'><product><type notFilterable='true'>simple</type><reference>" + reference + "</reference><id_manufacturer>" + manufacturer + "</id_manufacturer><price>" + price + "</price><active>1</active><state>1</state><id_type_redirected>0</id_type_redirected><available_for_order>1</available_for_order><id_category_default xlink:href='https://sfarmadroguerias.com/api/categories/" + category + "'>" + category + "</id_category_default><condition>new</condition><show_price>1</show_price><indexed>1</indexed><visibility>both</visibility><meta_description><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + description + "</language></meta_description><meta_keywords><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>Farmacia, online, droguería, Bogotá, Colombia, Domicilio, complemento, suplemento, dieta, niños</language></meta_keywords><meta_title><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></meta_title><link_rewrite><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></link_rewrite><name><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></name><description><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + description + "</language></description><associations><categories nodeType='category' api='categories'><category xlink:href='https://sfarmadroguerias.com/api/categories/" + category + "'><id>" + category + "</id></category></categories></associations></product></prestashop>"
+	} else {
+		xml = "<?xml version='1.0' encoding='UTF-8'?><prestashop xmlns:xlink='http://www.w3.org/1999/xlink'><product><id>" + id + "</id><type notFilterable='true'>simple</type><reference>" + reference + "</reference><id_manufacturer>" + manufacturer + "</id_manufacturer><price>" + price + "</price><active>1</active><state>1</state><id_type_redirected>0</id_type_redirected><available_for_order>1</available_for_order><id_category_default xlink:href='https://sfarmadroguerias.com/api/categories/" + category + "'>" + category + "</id_category_default><condition>new</condition><show_price>1</show_price><indexed>1</indexed><visibility>both</visibility><meta_description><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + description + "</language></meta_description><meta_keywords><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>Farmacia, online, droguería, Bogotá, Colombia, Domicilio, complemento, suplemento, dieta, niños</language></meta_keywords><meta_title>" + name + "</meta_title><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language><name><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + name + "</language></name><description><language id='2' xlink:href='https://sfarmadroguerias.com/api/languages/2'>" + description + "</language></description><associations><categories nodeType='category' api='categories'><category xlink:href='https://sfarmadroguerias.com/api/categories/" + category + "'><id>" + category + "</id></category></categories></associations></product></prestashop>"
+	}
 
 	return xml
 }
@@ -83,6 +92,18 @@ func init() {
 	dao.Server = config.Server
 	dao.Database = config.Database
 	dao.Connect()
+
+	govalidator.AddCustomRule("stateEnum", func(field string, rule string, message string, value interface{}) error {
+
+		x := []string{"sended", "rejected", "inShop", "inShopToApprove", "inShopRejected", "", "inactive"}
+
+		val := Helpers.Contains(x, value.(string))
+
+		if val != true {
+			return fmt.Errorf("The %s field must be a valid value for state Enum", field)
+		}
+		return nil
+	})
 }
 
 func main() {

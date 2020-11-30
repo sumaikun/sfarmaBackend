@@ -280,7 +280,7 @@ func testAddFile(filename string, productID string) {
 
 func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("prestashop product")
+	//fmt.Println("prestashop product")
 
 	var createProduct Models.CreateProduct
 	// Get the JSON body and decode into credentials
@@ -304,17 +304,17 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 
 	parsedProduct := product.(bson.M)
 
-	if parsedProduct["state"] == "sended" {
+	/*if parsedProduct["state"] == "sended" {
 		Helpers.RespondWithError(w, http.StatusBadRequest, "Product Already Sended")
 		return
-	}
+	}*/
 
-	if parsedProduct["picture"] == "" {
+	if parsedProduct["state"] != "inShop" && parsedProduct["picture"] == "" {
 		Helpers.RespondWithError(w, http.StatusBadRequest, "Product Need Image")
 		return
 	}
 
-	xml := returnXML(createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
+	xml := returnXML(parsedProduct["prestashopId"].(string), createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
 
 	//log.Println("xml", xml)
 
@@ -322,7 +322,19 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 
 	req, err := http.NewRequest("POST", "https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV", bytes.NewBuffer(xmlStr))
 	if err != nil {
-		log.Fatalln(err)
+		Helpers.RespondWithError(w, http.StatusBadRequest, "error generating request")
+		return
+	}
+
+	if len(parsedProduct["prestashopId"].(string)) > 0 {
+		//fmt.Println("update product url:", "https://sfarmadroguerias.com/api/products/"+parsedProduct["prestashopId"].(string)+"?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
+		fmt.Println("update product xml:", xml)
+
+		req, err = http.NewRequest("PUT", "https://sfarmadroguerias.com/api/products/"+parsedProduct["prestashopId"].(string)+"?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV", bytes.NewBuffer(xmlStr))
+		if err != nil {
+			Helpers.RespondWithError(w, http.StatusBadRequest, "error generating request")
+			return
+		}
 	}
 
 	req.Header.Set("Content-Type", "application/xml")
@@ -331,12 +343,15 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	response, err := client.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		Helpers.RespondWithError(w, http.StatusBadRequest, "error making request")
+		return
 	}
 
 	var result map[string]interface{}
 
 	json.NewDecoder(response.Body).Decode(&result)
+
+	fmt.Println("result", result)
 
 	productG, _ := result["product"].(map[string]interface{})
 
@@ -373,6 +388,12 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 
 	parsedProduct["state"] = "sended"
 
+	parsedProduct["prestashopId"] = productG["id"].(string)
+
+	parsedProduct["recommendedPrice"] = string(createProduct.Price)
+
+	parsedProduct["shopDefaultReference"] = string(createProduct.Reference)
+
 	if err := dao.Update("products", parsedProduct["_id"], parsedProduct); err != nil {
 		Helpers.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -386,7 +407,7 @@ func getAllRequest(url string) map[string][]interface{} {
 	// By now our original request body should have been populated, so let's just use it with our custom request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err.Error())
 	}
 	// We need to set the content type from the writer, it includes necessary boundary as well
 	req.Header.Set("Output-Format", "JSON")
@@ -395,7 +416,7 @@ func getAllRequest(url string) map[string][]interface{} {
 	client := &http.Client{}
 	response, err := client.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err.Error())
 	}
 
 	//fmt.Println(response.Body)
@@ -412,7 +433,7 @@ func getRequest(url string) map[string]interface{} {
 	// By now our original request body should have been populated, so let's just use it with our custom request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err.Error())
 	}
 	// We need to set the content type from the writer, it includes necessary boundary as well
 	req.Header.Set("Output-Format", "JSON")
@@ -421,7 +442,7 @@ func getRequest(url string) map[string]interface{} {
 	client := &http.Client{}
 	response, err := client.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err.Error())
 	}
 
 	//fmt.Println(response.Body)
@@ -633,61 +654,74 @@ func proccessPrestashopProducts() {
 	for _, element := range result["products"] {
 		md, _ := element.(map[string]interface{})
 		//fmt.Println("Key:", key, "=>", "Element:", md["name"])
-		if md["active"] == "1" {
+		//if md["active"] == "1" {
 
-			if md["id_manufacturer"] == "0" && md["id_supplier"] != "0" {
-				//fmt.Println("supplier", md)
-				supplier, _ := dao.FindOneByKEY("suppliers", "prestashopId", md["id_supplier"].(string))
-				//fmt.Println("supplier", supplier)
-				if supplier != nil {
-					parsedSupplier := supplier.(bson.M)
-					manufacturer, _ := dao.FindOneLikeKEY("laboratories", "name", parsedSupplier["name"].(string))
-					if manufacturer != nil {
-						parsedManufacturer := manufacturer.(bson.M)
-						var localProduct Models.Product
-						localProduct.Name = md["name"].(string)
-						localProduct.Category = md["id_category_default"].(string)
-						localProduct.Description = md["description"].(string)
-						localProduct.Laboratory = parsedManufacturer["prestashopId"].(string)
-						localProduct.RecommendedPrice = md["price"].(string)
-						localProduct.ShopDefaultReference = md["reference"].(string)
+		if md["id_manufacturer"] == "0" && md["id_supplier"] != "0" {
+			//fmt.Println("supplier", md)
+			supplier, _ := dao.FindOneByKEY("suppliers", "prestashopId", md["id_supplier"].(string))
+			//fmt.Println("supplier", supplier)
+			if supplier != nil {
+				parsedSupplier := supplier.(bson.M)
+				manufacturer, _ := dao.FindOneLikeKEY("laboratories", "name", parsedSupplier["name"].(string))
+				if manufacturer != nil {
+					parsedManufacturer := manufacturer.(bson.M)
+					var localProduct Models.Product
+					localProduct.Name = md["name"].(string)
+					localProduct.Category = md["id_category_default"].(string)
+					localProduct.Description = md["description"].(string)
+					localProduct.Laboratory = parsedManufacturer["prestashopId"].(string)
+					localProduct.RecommendedPrice = md["price"].(string)
+					localProduct.ShopDefaultReference = md["reference"].(string)
+					if md["active"] == "1" {
 						localProduct.State = "inShop"
-						prestaShopID := int(md["id"].(float64))
-						localProduct.PrestashopID = strconv.Itoa(prestaShopID)
-						localProduct.Date = time.Now().String()
-						localProduct.DefaultImageID = md["id_default_image"].(string)
-						//xml := returnXML(createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
+					} else {
+						localProduct.State = "inShopRejected"
+					}
+					prestaShopID := int(md["id"].(float64))
+					localProduct.PrestashopID = strconv.Itoa(prestaShopID)
+					localProduct.Date = time.Now().String()
+					localProduct.DefaultImageID = md["id_default_image"].(string)
+					//xml := returnXML(createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
 
-						exists, err := dao.FindManyByKEY("products", "prestashopId", strconv.Itoa(prestaShopID))
-						if err != nil {
+					exists, err := dao.FindManyByKEY("products", "prestashopId", strconv.Itoa(prestaShopID))
+					if err != nil {
+						return
+					}
+
+					//fmt.Println("len", len(exists.([]interface{})))
+
+					if len(exists.([]interface{})) == 0 {
+						//fmt.Println("product not exist")
+						localProduct.ID = bson.NewObjectId()
+						if err := dao.Insert("products", localProduct, nil); err != nil {
+							fmt.Println(err)
 							return
 						}
+					} else {
+						//fmt.Println("product exist")
+						parsedExist := exists.([]interface{})[0].(bson.M)
 
-						//fmt.Println("len", len(exists.([]interface{})))
+						parsedExist["name"] = localProduct.Name
 
-						if len(exists.([]interface{})) == 0 {
-							//fmt.Println("product not exist")
-							localProduct.ID = bson.NewObjectId()
-							if err := dao.Insert("products", localProduct, nil); err != nil {
-								fmt.Println(err)
-								return
-							}
-						} else {
-							//fmt.Println("product exist")
-							parsedExist := exists.([]interface{})[0].(bson.M)
-							localProduct.ID = parsedExist["_id"].(bson.ObjectId)
-							if err := dao.Update("products", localProduct.ID, localProduct); err != nil {
-								fmt.Println(err)
-								return
-							}
+						parsedExist["description"] = localProduct.Description
+
+						parsedExist["recommendedPrice"] = localProduct.RecommendedPrice
+
+						parsedExist["reference"] = localProduct.ShopDefaultReference
+
+						localProduct.ID = parsedExist["_id"].(bson.ObjectId)
+						if err := dao.Update("products", localProduct.ID, parsedExist); err != nil {
+							fmt.Println(err)
+							return
 						}
-
-						//fmt.Println("localProduct", localProduct)
 					}
-				}
 
+					//fmt.Println("localProduct", localProduct)
+				}
 			}
+
 		}
+		//}
 
 	}
 
@@ -1011,6 +1045,10 @@ func updateProductEndPoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	product.ID = parsedData["_id"].(bson.ObjectId)
+
+	if len(product.State) == 0 {
+		product.State = parsedData["state"].(string)
+	}
 
 	product.Date = parsedData["date"].(string)
 

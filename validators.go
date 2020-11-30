@@ -68,10 +68,11 @@ func productValidator(r *http.Request) (map[string]interface{}, Models.Product) 
 	var product Models.Product
 
 	rules := govalidator.MapData{
-		"name":     []string{"required"},
-		"category": []string{"required", "numeric"},
-		//"laboratory":  []string{"required", "numeric"},
+		"name":        []string{"required"},
+		"category":    []string{"required", "numeric"},
 		"description": []string{"required"},
+		"state":       []string{"stateEnum"},
+		//"laboratory":  []string{"required", "numeric"},
 	}
 
 	opts := govalidator.Options{
