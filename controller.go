@@ -1,7 +1,9 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
+	"encoding/base64"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -25,6 +27,8 @@ import (
 	Models "github.com/sumaikun/sfarma-rest-api/models"
 
 	Helpers "github.com/sumaikun/sfarma-rest-api/helpers"
+
+	"github.com/clbanning/mxj"
 )
 
 //-----------------------------  Auth functions --------------------------------------------------
@@ -292,7 +296,7 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(createProduct)
+	//log.Println(createProduct)
 
 	product, err := dao.FindByID("products", createProduct.Product)
 	if err != nil {
@@ -1312,4 +1316,157 @@ func massiveUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Helpers.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "ok"})
+}
+
+/*********** Commerssia  *********/
+
+func checkProductQuantityCommerssia(w http.ResponseWriter, r *http.Request) {
+
+	defer r.Body.Close()
+	log.Println(r.Body)
+
+	Helpers.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "ok"})
+}
+
+func makeCommerssiaRequest() {
+
+	var text = "'<DATOS><USUARIO>624154454F2912704B06435E06425001703E0BE3AFBC</USUARIO><CLAVE>624154454F2912704B06435E06425001706657A2F2</CLAVE><NOMBRE>CONSULTAINVENTARIOREFERENCIA</NOMBRE><REFCODIGO></REFCODIGO><ALMCODIGO>C003</ALMCODIGO><IDEMP>SFARMA</IDEMP></DATOS>'"
+
+	var xml = "<?xml version='1.0' encoding='utf-8'?><soap:Envelope xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema' xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'  ><soap:Body><wm_Reporte xlmns='http://tempuri.org'><pi_sEntrada>" + text + "</pi_sEntrada></wm_Reporte></soap:Body></soap:Envelope>"
+
+	//fmt.Println("xml", xml)
+
+	var xmlStr = []byte(xml)
+
+	req, err := http.NewRequest("POST", "http://auditoria.comerssia.com/PDPIntegracion/wsintegracion.asmx?op=wm_Reporte", bytes.NewBuffer(xmlStr))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	// We need to set the content type from the writer, it includes necessary boundary as well
+	req.Header.Set("SOAPAction", "http://tempuri.org/wm_Reporte")
+	req.Header.Set("Content-Type", "text/xml")
+
+	// Do the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fresp, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	resp.Body.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Println(string(f))
+
+	var parsedResponse = strings.Replace(string(fresp), "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><soap:Body><wm_ReporteResponse xmlns=\"http://tempuri.org/\"><wm_ReporteResult>", "", -1)
+
+	parsedResponse = strings.Replace(parsedResponse, "</wm_ReporteResult></wm_ReporteResponse></soap:Body></soap:Envelope>", "", -1)
+
+	//fmt.Println("parsedResponse", parsedResponse)
+
+	dec, err := base64.StdEncoding.DecodeString(parsedResponse)
+	if err != nil {
+		panic(err)
+	}
+
+	f, err := os.Create("./files/response.zip")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	if _, err := f.Write(dec); err != nil {
+		panic(err)
+	}
+	if err := f.Sync(); err != nil {
+		panic(err)
+	}
+
+	files, err := Unzip("./files/response.zip", "output-folder")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//fmt.Println("Unzipped:\n" + strings.Join(files, "\n"))
+
+	//fmt.Println("files[0]" + files[0])
+
+	contentF, err := ioutil.ReadFile(files[0])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Convert []byte to string and print to screen
+	textF := string(contentF)
+	fmt.Println(textF)
+
+	m, err := mxj.NewMapXmlSeq([]byte(textF))
+	if err != nil {
+		fmt.Println("err:", err)
+		return
+	}
+
+	fmt.Println("m", m)
+
+}
+
+func Unzip(src string, dest string) ([]string, error) {
+
+	var filenames []string
+
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return filenames, err
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+
+		// Store filename/path for returning and using later on
+		fpath := filepath.Join(dest, f.Name)
+
+		// Check for ZipSlip. More Info: http://bit.ly/2MsjAWE
+		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return filenames, fmt.Errorf("%s: illegal file path", fpath)
+		}
+
+		filenames = append(filenames, fpath)
+
+		if f.FileInfo().IsDir() {
+			// Make Folder
+			os.MkdirAll(fpath, os.ModePerm)
+			continue
+		}
+
+		// Make File
+		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+			return filenames, err
+		}
+
+		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return filenames, err
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return filenames, err
+		}
+
+		_, err = io.Copy(outFile, rc)
+
+		// Close the file without defer to close before next iteration of loop
+		outFile.Close()
+		rc.Close()
+
+		if err != nil {
+			return filenames, err
+		}
+	}
+	return filenames, nil
 }

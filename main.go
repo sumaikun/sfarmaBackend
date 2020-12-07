@@ -108,13 +108,15 @@ func init() {
 
 func main() {
 
-	go proccessPrestaShopDistributors()
+	makeCommerssiaRequest()
 
-	go proccessPrestashopSuppliers()
+	//go proccessPrestaShopDistributors()
 
-	go proccessPrestashopProducts()
+	//go proccessPrestashopSuppliers()
 
-	go proccessPrestaShopProductcategories()
+	//go proccessPrestashopProducts()
+
+	//go proccessPrestaShopProductcategories()
 
 	c := cron.New()
 	//c.AddFunc("*/5 * * * *", func() {
@@ -178,6 +180,9 @@ func main() {
 
 	router.Handle("/downloadFormat", middleware.AuthMiddleware(http.HandlerFunc(downloadFormat))).Methods("GET")
 	router.Handle("/massiveUpload", middleware.AuthMiddleware(middleware.UserMiddleware(http.HandlerFunc(massiveUpload)))).Methods("POST")
+
+	/**  commerssias connection services  */
+	router.HandleFunc("/checkProductQuantityCommerssia", checkProductQuantityCommerssia).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":"+port, &CORSRouterDecorator{router}))
 
