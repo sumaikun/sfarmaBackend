@@ -461,6 +461,8 @@ func getRequest(url string) map[string]interface{} {
 
 func proccessPrestaShopDistributors() {
 
+	fmt.Println("execute distributors")
+
 	result := getAllRequest("https://sfarmadroguerias.com/api/manufacturers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
 
 	var slice []interface{}
@@ -1325,14 +1327,32 @@ func checkProductQuantityCommerssia(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	log.Println(r.Body)
 
-	Helpers.RespondWithJSON(w, http.StatusOK, map[string]string{"message": "ok"})
+	var v interface{}
+	err := json.NewDecoder(r.Body).Decode(&v)
+
+	if err != nil {
+		// If the structure of the body is wrong, return an HTTP error
+		fmt.Println("err", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	parsedV := v.(map[string]interface{})
+
+	fmt.Println("v", parsedV["reference"])
+
+	validation := makeCommerssiaRequest(parsedV["reference"].(string))
+
+	Helpers.RespondWithJSON(w, http.StatusOK, map[string]bool{"message": validation})
 }
 
-func makeCommerssiaRequest() {
+func makeCommerssiaRequest(reference string) bool {
 
-	var text = "'<DATOS><USUARIO>624154454F2912704B06435E06425001703E0BE3AFBC</USUARIO><CLAVE>624154454F2912704B06435E06425001706657A2F2</CLAVE><NOMBRE>CONSULTAINVENTARIOREFERENCIA</NOMBRE><REFCODIGO></REFCODIGO><ALMCODIGO>C003</ALMCODIGO><IDEMP>SFARMA</IDEMP></DATOS>'"
+	//var text = "&lt;DATOS&gt;&lt;USUARIO&gt;624154454F2912704B06435E06425001703E0BE3AFBC&lt;/USUARIO&gt;&lt;CLAVE&gt;624154454F2912704B06435E06425001706657A2F2&lt;/CLAVE&gt;&lt;NOMBRE&gt;CONSULTAINVENTARIOREFERENCIA&lt;/NOMBRE&gt;&lt;REFCODIGO&gt;00020&lt;/REFCODIGO&gt;&lt;ALMCODIGO&gt;&lt;/ALMCODIGO&gt;&lt;IDEMP&gt;SFARMA&lt;/IDEMP&gt;&lt;/DATOS&gt;"
 
-	var xml = "<?xml version='1.0' encoding='utf-8'?><soap:Envelope xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema' xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'  ><soap:Body><wm_Reporte xlmns='http://tempuri.org'><pi_sEntrada>" + text + "</pi_sEntrada></wm_Reporte></soap:Body></soap:Envelope>"
+	//var xml = "<?xml version=\"1.0\" ?><S:Envelope xmlns:S=\"http://schemas.xmlsoap.org/soap/envelope/\"><S:Body><wm_Reporte xmlns=\"http://tempuri.org/\"><pi_sEntrada>&lt;DATOS&gt;&lt;USUARIO&gt;624154454F2912704B06435E06425001703E0BE3AFBC&lt;/USUARIO&gt;&lt;CLAVE&gt;624154454F2912704B06435E06425001706657A2F2&lt;/CLAVE&gt;&lt;NOMBRE&gt;CONSULTAINVENTARIOREFERENCIA&lt;/NOMBRE&gt;&lt;REFCODIGO&gt;00020&lt;/REFCODIGO&gt;&lt;ALMCODIGO&gt;&lt;/ALMCODIGO&gt;&lt;IDEMP&gt;SFARMA&lt;/IDEMP&gt;&lt;/DATOS&gt;</pi_sEntrada></wm_Reporte></S:Body></S:Envelope>"
+
+	var xml = "<?xml version=\"1.0\" ?><S:Envelope xmlns:S=\"http://schemas.xmlsoap.org/soap/envelope/\"><S:Body><wm_Reporte xmlns=\"http://tempuri.org/\"><pi_sEntrada>&lt;DATOS&gt;&lt;USUARIO&gt;624154454F2912704B06435E06425001703E0BE3AFBC&lt;/USUARIO&gt;&lt;CLAVE&gt;624154454F2912704B06435E06425001706657A2F2&lt;/CLAVE&gt;&lt;NOMBRE&gt;CONSULTAINVENTARIOREFERENCIA&lt;/NOMBRE&gt;&lt;REFCODIGO&gt;" + reference + "&lt;/REFCODIGO&gt;&lt;ALMCODIGO&gt;&lt;/ALMCODIGO&gt;&lt;IDEMP&gt;SFARMA&lt;/IDEMP&gt;&lt;/DATOS&gt;</pi_sEntrada></wm_Reporte></S:Body></S:Envelope>"
 
 	//fmt.Println("xml", xml)
 
@@ -1403,15 +1423,65 @@ func makeCommerssiaRequest() {
 
 	// Convert []byte to string and print to screen
 	textF := string(contentF)
-	fmt.Println(textF)
+	//fmt.Println(textF)
 
 	m, err := mxj.NewMapXmlSeq([]byte(textF))
 	if err != nil {
 		fmt.Println("err:", err)
-		return
+		return false
 	}
 
-	fmt.Println("m", m)
+	//fmt.Println("m", len(m["RESPUESTA"].(map[string]interface{})))
+
+	respuesta := m["RESPUESTA"].(map[string]interface{})
+
+	//m["RESPUESTA"]
+
+	var amount int
+
+	amount = 0
+
+	if respuesta != nil {
+		//fmt.Println(respuesta["REGISTROS"].(map[string]interface{}))
+
+		registersParent := respuesta["REGISTROS"].(map[string]interface{})
+
+		registers := registersParent["REGISTRO"].([]interface{})
+
+		for index, _ := range registers {
+			//fmt.Println("f", f)
+			//fmt.Println("index", index)
+
+			register := registers[index].(map[string]interface{})
+
+			INVTotal := register["INVTotal"].(map[string]interface{})
+
+			INVTotalData := INVTotal["#text"].(string)
+
+			//fmt.Println("INVTotalData", INVTotalData)
+
+			f, _ := strconv.ParseFloat(INVTotalData, 64)
+
+			//fmt.Println("f", f)
+
+			s := int(f)
+
+			//fmt.Println("s", s)
+
+			amount = amount + s
+
+		}
+
+		fmt.Println("inventory qua:", amount)
+
+		if amount > 0 {
+			return true
+		}
+
+		return false
+	}
+
+	return false
 
 }
 

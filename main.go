@@ -108,7 +108,7 @@ func init() {
 
 func main() {
 
-	makeCommerssiaRequest()
+	makeCommerssiaRequest("00020")
 
 	//go proccessPrestaShopDistributors()
 
@@ -120,7 +120,7 @@ func main() {
 
 	c := cron.New()
 	//c.AddFunc("*/5 * * * *", func() {
-	c.AddFunc("0 * * * *", func() {
+	c.AddFunc("@hourly", func() {
 		fmt.Println("Executed each hour")
 		go proccessPrestaShopDistributors()
 
@@ -182,7 +182,7 @@ func main() {
 	router.Handle("/massiveUpload", middleware.AuthMiddleware(middleware.UserMiddleware(http.HandlerFunc(massiveUpload)))).Methods("POST")
 
 	/**  commerssias connection services  */
-	router.HandleFunc("/checkProductQuantityCommerssia", checkProductQuantityCommerssia).Methods("GET")
+	router.HandleFunc("/checkProductQuantityCommerssia", checkProductQuantityCommerssia).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":"+port, &CORSRouterDecorator{router}))
 
