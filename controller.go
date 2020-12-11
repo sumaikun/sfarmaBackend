@@ -234,7 +234,8 @@ func testAddFile(filename string, productID string) {
 	// Open the file
 	file, err := os.Open("./files/" + filename)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println("error:", err)
+		return
 	}
 	// Close the file later
 	defer file.Close()
@@ -250,20 +251,23 @@ func testAddFile(filename string, productID string) {
 	// Initialize the file field
 	fileWriter, err := multiPartWriter.CreateFormFile("image", filename)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println("error:", err)
+		return
 	}
 
 	// Copy the actual file content to the field field's writer
 	_, err = io.Copy(fileWriter, file)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println("error:", err)
+		return
 	}
 
 	multiPartWriter.Close()
 
 	req, err := http.NewRequest("POST", "https://sfarmadroguerias.com/api/images/products/"+productID+"?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV", &requestBody)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println("error:", err)
+		return
 	}
 	// We need to set the content type from the writer, it includes necessary boundary as well
 	req.Header.Set("Content-Type", multiPartWriter.FormDataContentType())
@@ -272,7 +276,8 @@ func testAddFile(filename string, productID string) {
 	client := &http.Client{}
 	response, err := client.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println("error:", err)
+		return
 	}
 
 	var result map[string]interface{}
@@ -1343,10 +1348,10 @@ func checkProductQuantityCommerssia(w http.ResponseWriter, r *http.Request) {
 
 	validation := makeCommerssiaRequest(parsedV["reference"].(string))
 
-	Helpers.RespondWithJSON(w, http.StatusOK, map[string]bool{"message": validation})
+	Helpers.RespondWithJSON(w, http.StatusOK, map[string]int{"message": validation})
 }
 
-func makeCommerssiaRequest(reference string) bool {
+func makeCommerssiaRequest(reference string) int {
 
 	//var text = "&lt;DATOS&gt;&lt;USUARIO&gt;624154454F2912704B06435E06425001703E0BE3AFBC&lt;/USUARIO&gt;&lt;CLAVE&gt;624154454F2912704B06435E06425001706657A2F2&lt;/CLAVE&gt;&lt;NOMBRE&gt;CONSULTAINVENTARIOREFERENCIA&lt;/NOMBRE&gt;&lt;REFCODIGO&gt;00020&lt;/REFCODIGO&gt;&lt;ALMCODIGO&gt;&lt;/ALMCODIGO&gt;&lt;IDEMP&gt;SFARMA&lt;/IDEMP&gt;&lt;/DATOS&gt;"
 
@@ -1370,16 +1375,19 @@ func makeCommerssiaRequest(reference string) bool {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 
 	fresp, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err)
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 	resp.Body.Close()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 	//fmt.Println(string(f))
 
@@ -1391,25 +1399,30 @@ func makeCommerssiaRequest(reference string) bool {
 
 	dec, err := base64.StdEncoding.DecodeString(parsedResponse)
 	if err != nil {
-		panic(err)
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 
 	f, err := os.Create("./files/response.zip")
 	if err != nil {
-		panic(err)
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 	defer f.Close()
 
 	if _, err := f.Write(dec); err != nil {
-		panic(err)
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 	if err := f.Sync(); err != nil {
-		panic(err)
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 
 	files, err := Unzip("./files/response.zip", "output-folder")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 
 	//fmt.Println("Unzipped:\n" + strings.Join(files, "\n"))
@@ -1418,17 +1431,18 @@ func makeCommerssiaRequest(reference string) bool {
 
 	contentF, err := ioutil.ReadFile(files[0])
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 
 	// Convert []byte to string and print to screen
 	textF := string(contentF)
-	//fmt.Println(textF)
+	fmt.Println(textF)
 
 	m, err := mxj.NewMapXmlSeq([]byte(textF))
 	if err != nil {
-		fmt.Println("err:", err)
-		return false
+		fmt.Println("err:", err.Error())
+		return -1
 	}
 
 	//fmt.Println("m", len(m["RESPUESTA"].(map[string]interface{})))
@@ -1474,14 +1488,10 @@ func makeCommerssiaRequest(reference string) bool {
 
 		fmt.Println("inventory qua:", amount)
 
-		if amount > 0 {
-			return true
-		}
-
-		return false
+		return amount
 	}
 
-	return false
+	return -1
 
 }
 

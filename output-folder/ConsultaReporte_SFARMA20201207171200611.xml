@@ -1,0 +1,260 @@
+<RESPUESTA>
+  <ERROR>
+    <CODIGO>0</CODIGO>
+    <DESCRIPCION>EJECUCION EXITOSA</DESCRIPCION>
+  </ERROR>
+  <REGISTROS>
+    <REGISTRO>
+      <ALMCodigo>C036</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 36 FARMACENTER LA VICTORIA</ALMNombre>
+      <INVTotal>7.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>7.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C035</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 35 SOSIEGO</ALMNombre>
+      <INVTotal>3.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>3.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C034</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 34 CASTILLA</ALMNombre>
+      <INVTotal>0.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>0.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C033</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 33 ENGATIVA</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C032</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 32 LA VICTORIA</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C030</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 30 SUBA</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C029</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 29 ZIPAQUIRA</ALMNombre>
+      <INVTotal>0.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>0.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C028</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 28 NORMANDIA</ALMNombre>
+      <INVTotal>0.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>0.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C027</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 27 FARMACENTER FUNZA</ALMNombre>
+      <INVTotal>3.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>3.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C026</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 26 MILANESA</ALMNombre>
+      <INVTotal>0.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>0.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C025</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 25 MONTERREY</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C024</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 24 RESTREPO</ALMNombre>
+      <INVTotal>2.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>2.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C023</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 23 LA FRAGUA</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C022</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 22 CEDRITOS</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C021</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 21 TREBOLIS</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C020</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 20 LUCERO</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C019</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 19 AV CHILE</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C018</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 18 SOACHA</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C017</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 17 BELEN</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C016</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 16 MOLINOS</ALMNombre>
+      <INVTotal>2.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>2.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C015</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 15 ALAMOS</ALMNombre>
+      <INVTotal>2.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>2.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C014</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 14  SANTA ISABEL</ALMNombre>
+      <INVTotal>2.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>2.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C013</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 13 VERAGUAS</ALMNombre>
+      <INVTotal>0.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>0.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C012</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 12 LA GLORIA</ALMNombre>
+      <INVTotal>0.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>0.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C011</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 11  GALERIAS</ALMNombre>
+      <INVTotal>3.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>3.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C010</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 10 VILLA CLAUDIA</ALMNombre>
+      <INVTotal>999999.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>999999.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C009</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 09 ASUNCION</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C008</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 08  VICTORIA</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C007</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 07 SANTA LIBRADA</ALMNombre>
+      <INVTotal>2.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>2.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C006</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 06 CIPRIANO</ALMNombre>
+      <INVTotal>2.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>2.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C005</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 05 C.MONTES</ALMNombre>
+      <INVTotal>0.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>0.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C004</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 04 SANTA FE</ALMNombre>
+      <INVTotal>3.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>3.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C003</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 03  FUNZA</ALMNombre>
+      <INVTotal>3.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>3.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C002</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 02 PATIO BONITO</ALMNombre>
+      <INVTotal>1.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>1.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C001</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 01 SPRINT</ALMNombre>
+      <INVTotal>2.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>2.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>A002</ALMCodigo>
+      <ALMNombre>BODEGA 2</ALMNombre>
+      <INVTotal>59.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>59.0000</INVDisponible>
+    </REGISTRO>
+  </REGISTROS>
+</RESPUESTA>
