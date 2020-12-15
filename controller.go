@@ -432,7 +432,9 @@ func getAllRequest(url string) map[string][]interface{} {
 
 	var result map[string][]interface{}
 
-	json.NewDecoder(response.Body).Decode(&result)
+	if response.Body != nil {
+		json.NewDecoder(response.Body).Decode(&result)
+	}
 
 	return result
 
@@ -469,6 +471,10 @@ func proccessPrestaShopDistributors() {
 	fmt.Println("execute distributors")
 
 	result := getAllRequest("https://sfarmadroguerias.com/api/manufacturers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
+
+	if result == nil {
+		return
+	}
 
 	var slice []interface{}
 
