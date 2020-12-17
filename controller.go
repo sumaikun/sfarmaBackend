@@ -412,11 +412,12 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getAllRequest(url string) map[string][]interface{} {
+func getAllRequest(url string) (map[string][]interface{}, error) {
 	// By now our original request body should have been populated, so let's just use it with our custom request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err.Error())
+		return nil, err
 	}
 	// We need to set the content type from the writer, it includes necessary boundary as well
 	req.Header.Set("Output-Format", "JSON")
@@ -426,25 +427,27 @@ func getAllRequest(url string) map[string][]interface{} {
 	response, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
+		return nil, err
 	}
 
 	//fmt.Println(response.Body)
 
 	var result map[string][]interface{}
 
-	if response.Body != nil {
+	if response != nil {
 		json.NewDecoder(response.Body).Decode(&result)
 	}
 
-	return result
+	return result, nil
 
 }
 
-func getRequest(url string) map[string]interface{} {
+func getRequest(url string) (map[string]interface{}, error) {
 	// By now our original request body should have been populated, so let's just use it with our custom request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println(err.Error())
+		return nil, err
 	}
 	// We need to set the content type from the writer, it includes necessary boundary as well
 	req.Header.Set("Output-Format", "JSON")
@@ -454,15 +457,18 @@ func getRequest(url string) map[string]interface{} {
 	response, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err.Error())
+		return nil, err
 	}
 
 	//fmt.Println(response.Body)
 
 	var result map[string]interface{}
 
-	json.NewDecoder(response.Body).Decode(&result)
+	if response != nil {
+		json.NewDecoder(response.Body).Decode(&result)
+	}
 
-	return result
+	return result, nil
 
 }
 
@@ -470,9 +476,10 @@ func proccessPrestaShopDistributors() {
 
 	fmt.Println("execute distributors")
 
-	result := getAllRequest("https://sfarmadroguerias.com/api/manufacturers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
+	result, err := getAllRequest("https://sfarmadroguerias.com/api/manufacturers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
 
-	if result == nil {
+	if err != nil {
+
 		return
 	}
 
@@ -482,7 +489,12 @@ func proccessPrestaShopDistributors() {
 
 		md, _ := element.(map[string]interface{})
 
-		subelement := constructDistributors(fmt.Sprintf("%g", md["id"]))
+		subelement, err := constructDistributors(fmt.Sprintf("%g", md["id"]))
+
+		if err != nil {
+
+			return
+		}
 
 		if subelement["active"] == "1" {
 			slice = append(slice, subelement)
@@ -561,23 +573,38 @@ func getPrestaShopDistributors(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func constructDistributors(id string) map[string]interface{} {
+func constructDistributors(id string) (map[string]interface{}, error) {
 
-	result := getRequest("https://sfarmadroguerias.com/api/manufacturers/" + id + "?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
+	result, err := getRequest("https://sfarmadroguerias.com/api/manufacturers/" + id + "?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
 
+	if err != nil {
+
+		return nil, err
+	}
 	//log.Println(result)
 
-	manufacturer, _ := result["manufacturer"].(map[string]interface{})
+	if result != nil {
+		manufacturer, _ := result["manufacturer"].(map[string]interface{})
 
-	//fmt.Println("Key:", manufacturer["id"], "=>", "Element:", manufacturer["name"], " ", "active", manufacturer["active"])
+		//fmt.Println("Key:", manufacturer["id"], "=>", "Element:", manufacturer["name"], " ", "active", manufacturer["active"])
 
-	return manufacturer
+		return manufacturer, nil
+
+	}
+
+	return nil, nil
 
 }
 
 func proccessPrestaShopProductcategories() {
 
-	result := getAllRequest("https://sfarmadroguerias.com/api/categories?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&output_format=JSON&display=[id,name,active]")
+	result, err := getAllRequest("https://sfarmadroguerias.com/api/categories?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&output_format=JSON&display=[id,name,active]")
+
+	if err != nil {
+
+		return
+	}
+
 	//fmt.Println("Key:", key, "=>", "Element:", element)
 	var category Models.Categories
 
@@ -651,7 +678,12 @@ func constructCategory(id string) map[string]interface{} {
 
 	//fmt.Println("https://sfarmadroguerias.com/api/categories/" + id + "?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
 
-	result := getRequest("https://sfarmadroguerias.com/api/categories/" + id + "?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
+	result, err := getRequest("https://sfarmadroguerias.com/api/categories/" + id + "?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV")
+
+	if err != nil {
+
+		return nil
+	}
 
 	//log.Println(result)
 
@@ -666,7 +698,12 @@ func constructCategory(id string) map[string]interface{} {
 
 func proccessPrestashopProducts() {
 
-	result := getAllRequest("https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[id,name,reference,price,id_manufacturer,description,id_category_default,id_default_image,active,id_supplier]&output_format=JSON")
+	result, err := getAllRequest("https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[id,name,reference,price,id_manufacturer,description,id_category_default,id_default_image,active,id_supplier]&output_format=JSON")
+
+	if err != nil {
+
+		return
+	}
 
 	for _, element := range result["products"] {
 		md, _ := element.(map[string]interface{})
@@ -748,7 +785,12 @@ func proccessPrestashopProducts() {
 
 func proccessPrestashopSuppliers() {
 
-	result := getAllRequest("https://sfarmadroguerias.com/api/suppliers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&output_format=JSON&display=[id,name,active]")
+	result, err := getAllRequest("https://sfarmadroguerias.com/api/suppliers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&output_format=JSON&display=[id,name,active]")
+
+	if err != nil {
+
+		return
+	}
 
 	var supplier Models.Suppliers
 
