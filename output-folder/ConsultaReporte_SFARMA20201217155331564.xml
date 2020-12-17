@@ -1,0 +1,22 @@
+<RESPUESTA>
+  <ERROR>
+    <CODIGO>0</CODIGO>
+    <DESCRIPCION>EJECUCION EXITOSA</DESCRIPCION>
+  </ERROR>
+  <REGISTROS>
+    <REGISTRO>
+      <ALMCodigo>C003</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 03  FUNZA</ALMNombre>
+      <INVTotal>150.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>150.0000</INVDisponible>
+    </REGISTRO>
+    <REGISTRO>
+      <ALMCodigo>C002</ALMCodigo>
+      <ALMNombre>SFARMA DROGUERIAS NO. 02 PATIO BONITO</ALMNombre>
+      <INVTotal>100.0000</INVTotal>
+      <INVComprometido>0.0000</INVComprometido>
+      <INVDisponible>100.0000</INVDisponible>
+    </REGISTRO>
+  </REGISTROS>
+</RESPUESTA>
