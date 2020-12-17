@@ -1506,48 +1506,51 @@ func makeCommerssiaRequest(reference string) int {
 	if respuesta != nil {
 		//fmt.Println(respuesta["REGISTROS"].(map[string]interface{}))
 
-		registersParent := respuesta["REGISTROS"].(map[string]interface{})
-
-		registers, ok := registersParent["REGISTRO"].([]interface{})
+		registersParent, ok := respuesta["REGISTROS"].(map[string]interface{})
 
 		if ok == true {
-			for index, _ := range registers {
-				//fmt.Println("f", f)
-				//fmt.Println("index", index)
 
-				register := registers[index].(map[string]interface{})
+			registers, ok := registersParent["REGISTRO"].([]interface{})
 
+			if ok == true {
+				for index, _ := range registers {
+					//fmt.Println("f", f)
+					//fmt.Println("index", index)
+
+					register := registers[index].(map[string]interface{})
+
+					INVTotal := register["INVTotal"].(map[string]interface{})
+
+					INVTotalData := INVTotal["#text"].(string)
+
+					//fmt.Println("INVTotalData", INVTotalData)
+
+					f, _ := strconv.ParseFloat(INVTotalData, 64)
+
+					//fmt.Println("f", f)
+
+					s := int(f)
+
+					//fmt.Println("s", s)
+
+					amount = amount + s
+
+				}
+			}
+
+			register, ok := registersParent["REGISTRO"].(map[string]interface{})
+
+			if ok == true {
 				INVTotal := register["INVTotal"].(map[string]interface{})
 
 				INVTotalData := INVTotal["#text"].(string)
 
-				//fmt.Println("INVTotalData", INVTotalData)
-
 				f, _ := strconv.ParseFloat(INVTotalData, 64)
-
-				//fmt.Println("f", f)
 
 				s := int(f)
 
-				//fmt.Println("s", s)
-
 				amount = amount + s
-
 			}
-		}
-
-		register, ok := registersParent["REGISTRO"].(map[string]interface{})
-
-		if ok == true {
-			INVTotal := register["INVTotal"].(map[string]interface{})
-
-			INVTotalData := INVTotal["#text"].(string)
-
-			f, _ := strconv.ParseFloat(INVTotalData, 64)
-
-			s := int(f)
-
-			amount = amount + s
 		}
 
 		fmt.Println("inventory qua:", amount)
