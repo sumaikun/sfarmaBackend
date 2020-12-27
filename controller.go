@@ -323,7 +323,7 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	xml := returnXML(parsedProduct["prestashopId"].(string), createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string))
+	xml := returnXML(parsedProduct["prestashopId"].(string), createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string), parsedProduct["ean13"].(string), parsedProduct["width"].(string), parsedProduct["height"].(string), parsedProduct["unity"].(string), parsedProduct["metaTitle"].(string), parsedProduct["metaDescription"].(string), parsedProduct["metaKeywords"].(string), parsedProduct["descriptionShort"].(string))
 
 	//log.Println("xml", xml)
 
@@ -1223,6 +1223,28 @@ func updateTransferEndPoint(w http.ResponseWriter, r *http.Request) {
 
 	Helpers.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 
+}
+
+//------------------------------------- Testing xml -----------------------------------------
+
+func testingXML(w http.ResponseWriter, r *http.Request) {
+
+	defer r.Body.Close()
+	params := mux.Vars(r)
+	product, err := dao.FindByID("products", params["idProduct"])
+	if err != nil {
+		Helpers.RespondWithError(w, http.StatusBadRequest, "Invalid Product ID")
+		return
+	}
+
+	var parsedProduct Models.Product
+
+	bsonBytes, _ := bson.Marshal(product)
+	bson.Unmarshal(bsonBytes, &parsedProduct)
+
+	xml := returnXML(parsedProduct.PrestashopID, parsedProduct.ShopDefaultReference, parsedProduct.Laboratory, parsedProduct.RecommendedPrice, parsedProduct.Category, parsedProduct.Description, parsedProduct.Name, parsedProduct.Ean13, parsedProduct.Width, parsedProduct.Height, parsedProduct.Unity, parsedProduct.MetaTitle, parsedProduct.MetaDescription, parsedProduct.MetaKeywords, parsedProduct.DescriptionShort)
+
+	w.Write([]byte(xml))
 }
 
 //-------------------------------------- file Upload -----------------------------------------

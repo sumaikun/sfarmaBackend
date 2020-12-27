@@ -61,6 +61,14 @@ type Product struct {
 	DefaultImageID           string        `bson:"defaultImageID" json:"defaultImageID"`
 	Date                     string        `bson:"date" json:"date"`
 	UpdateDate               string        `bson:"update_date" json:"update_date"`
+	Unity                    string        `bson:"unity" json:"unity"`
+	MetaTitle                string        `bson:"metaTitle" json:"metaTitle"`
+	MetaDescription          string        `bson:"metaDescription" json:"metaDescription"`
+	MetaKeywords             string        `bson:"metaKeywords" json:"metaKeywords"`
+	Ean13                    string        `bson:"ean13" json:"ean13"`
+	Width                    string        `bson:"width" json:"width"`
+	Height                   string        `bson:"height" json:"height"`
+	DescriptionShort         string        `bson:"descriptionShort" json:"descriptionShort"`
 }
 
 //Transfer representation in mongo
