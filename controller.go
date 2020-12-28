@@ -323,9 +323,16 @@ func createPrestaShopProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	xml := returnXML(parsedProduct["prestashopId"].(string), createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string), parsedProduct["ean13"].(string), parsedProduct["width"].(string), parsedProduct["height"].(string), parsedProduct["unity"].(string), parsedProduct["metaTitle"].(string), parsedProduct["metaDescription"].(string), parsedProduct["metaKeywords"].(string), parsedProduct["descriptionShort"].(string))
+	var parsedProductM Models.Product
 
-	//log.Println("xml", xml)
+	bsonBytes, _ := bson.Marshal(product)
+	bson.Unmarshal(bsonBytes, &parsedProductM)
+
+	//xml := returnXML(parsedProduct["prestashopId"].(string), createProduct.Reference, parsedProduct["laboratory"].(string), createProduct.Price, parsedProduct["category"].(string), parsedProduct["description"].(string), parsedProduct["name"].(string), parsedProduct["ean13"].(string), parsedProduct["width"].(string), parsedProduct["height"].(string), parsedProduct["unity"].(string), parsedProduct["metaTitle"].(string), parsedProduct["metaDescription"].(string), parsedProduct["metaKeywords"].(string), parsedProduct["descriptionShort"].(string))
+
+	xml := returnXML(parsedProductM.PrestashopID, createProduct.Reference, parsedProductM.Laboratory, createProduct.Price, parsedProductM.Category, parsedProductM.Description, parsedProductM.Name, parsedProductM.ExternalBoxDesc, parsedProductM.Width, parsedProductM.Height, parsedProductM.Unity, parsedProductM.MetaTitle, parsedProductM.MetaDescription, parsedProductM.MetaKeywords, parsedProductM.DescriptionShort)
+
+	log.Println("xml", xml)
 
 	var xmlStr = []byte(xml)
 
@@ -1242,7 +1249,7 @@ func testingXML(w http.ResponseWriter, r *http.Request) {
 	bsonBytes, _ := bson.Marshal(product)
 	bson.Unmarshal(bsonBytes, &parsedProduct)
 
-	xml := returnXML(parsedProduct.PrestashopID, parsedProduct.ShopDefaultReference, parsedProduct.Laboratory, parsedProduct.RecommendedPrice, parsedProduct.Category, parsedProduct.Description, parsedProduct.Name, parsedProduct.Ean13, parsedProduct.Width, parsedProduct.Height, parsedProduct.Unity, parsedProduct.MetaTitle, parsedProduct.MetaDescription, parsedProduct.MetaKeywords, parsedProduct.DescriptionShort)
+	xml := returnXML(parsedProduct.PrestashopID, parsedProduct.ShopDefaultReference, parsedProduct.Laboratory, parsedProduct.RecommendedPrice, parsedProduct.Category, parsedProduct.Description, parsedProduct.Name, parsedProduct.ExternalBoxDesc, parsedProduct.Width, parsedProduct.Height, parsedProduct.Unity, parsedProduct.MetaTitle, parsedProduct.MetaDescription, parsedProduct.MetaKeywords, parsedProduct.DescriptionShort)
 
 	w.Write([]byte(xml))
 }

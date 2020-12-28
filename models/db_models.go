@@ -65,7 +65,6 @@ type Product struct {
 	MetaTitle                string        `bson:"metaTitle" json:"metaTitle"`
 	MetaDescription          string        `bson:"metaDescription" json:"metaDescription"`
 	MetaKeywords             string        `bson:"metaKeywords" json:"metaKeywords"`
-	Ean13                    string        `bson:"ean13" json:"ean13"`
 	Width                    string        `bson:"width" json:"width"`
 	Height                   string        `bson:"height" json:"height"`
 	DescriptionShort         string        `bson:"descriptionShort" json:"descriptionShort"`
