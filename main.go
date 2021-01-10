@@ -114,7 +114,7 @@ func main() {
 
 	//go proccessPrestashopSuppliers()
 
-	//go proccessPrestashopProducts()
+	go proccessPrestashopProducts()
 
 	//go proccessPrestaShopProductcategories()
 

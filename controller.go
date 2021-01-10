@@ -426,8 +426,12 @@ func getAllRequest(url string) (map[string][]interface{}, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
+
+	//fmt.Println("req", req)
+
 	// We need to set the content type from the writer, it includes necessary boundary as well
 	req.Header.Set("Output-Format", "JSON")
+	req.Header.Set("Connection", "keep-alive")
 
 	// Do the request
 	client := &http.Client{}
@@ -437,7 +441,7 @@ func getAllRequest(url string) (map[string][]interface{}, error) {
 		return nil, err
 	}
 
-	//fmt.Println(response.Body)
+	//fmt.Println("body", response)
 
 	var result map[string][]interface{}
 
@@ -705,12 +709,18 @@ func constructCategory(id string) map[string]interface{} {
 
 func proccessPrestashopProducts() {
 
-	result, err := getAllRequest("https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[id,name,reference,price,id_manufacturer,description,id_category_default,id_default_image,active,id_supplier]&output_format=JSON")
+	fmt.Println("proccess prestashop products")
 
+	result, err := getAllRequest("https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[id,name,reference,price,id_manufacturer,description,id_category_default,active,id_supplier,id_default_image]&output_format=JSON")
+	//,width,height,ean13,meta_title,meta_description,meta_keywords,id_default_image,unity,description_short
 	if err != nil {
+
+		fmt.Println("getting products error", err)
 
 		return
 	}
+
+	//fmt.Println("result", result)
 
 	for _, element := range result["products"] {
 		md, _ := element.(map[string]interface{})
@@ -733,6 +743,7 @@ func proccessPrestashopProducts() {
 					localProduct.Laboratory = parsedManufacturer["prestashopId"].(string)
 					localProduct.RecommendedPrice = md["price"].(string)
 					localProduct.ShopDefaultReference = md["reference"].(string)
+
 					if md["active"] == "1" {
 						localProduct.State = "inShop"
 					} else {
@@ -756,7 +767,7 @@ func proccessPrestashopProducts() {
 						localProduct.ID = bson.NewObjectId()
 						if err := dao.Insert("products", localProduct, nil); err != nil {
 							fmt.Println(err)
-							return
+							//return
 						}
 					} else {
 						//fmt.Println("product exist")
@@ -773,7 +784,7 @@ func proccessPrestashopProducts() {
 						localProduct.ID = parsedExist["_id"].(bson.ObjectId)
 						if err := dao.Update("products", localProduct.ID, parsedExist); err != nil {
 							fmt.Println(err)
-							return
+							//return
 						}
 					}
 
@@ -783,6 +794,57 @@ func proccessPrestashopProducts() {
 
 		}
 		//}
+
+	}
+	fmt.Println("finish execute get products")
+	proccessPrestashopProducts2()
+}
+
+func proccessPrestashopProducts2() {
+
+	fmt.Println("proccess prestashop products 2")
+
+	result, err := getAllRequest("https://sfarmadroguerias.com/api/products?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[id,width,height,ean13,meta_title,meta_description,meta_keywords,unity,description_short]&output_format=JSON")
+	//
+	if err != nil {
+
+		fmt.Println("getting products error", err)
+
+		return
+	}
+
+	fmt.Println("result", result)
+
+	for _, element := range result["products"] {
+		md, _ := element.(map[string]interface{})
+		//fmt.Println("Key:", key, "=>", "Element:", md["unity"])
+
+		prestaShopID := int(md["id"].(float64))
+
+		exists, err := dao.FindManyByKEY("products", "prestashopId", strconv.Itoa(prestaShopID))
+		if err != nil {
+			return
+		}
+
+		if len(exists.([]interface{})) > 0 {
+
+			parsedExist := exists.([]interface{})[0].(bson.M)
+
+			parsedExist["width"] = md["width"].(string)
+			parsedExist["height"] = md["height"].(string)
+			parsedExist["externalBoxDesc"] = md["ean13"].(string)
+			parsedExist["metaTitle"] = md["meta_title"].(string)
+			parsedExist["metaDescription"] = md["meta_description"].(string)
+			parsedExist["metaKeywords"] = md["meta_keywords"].(string)
+			parsedExist["unity"] = md["unity"].(string)
+			parsedExist["descriptionShort"] = md["description_short"].(string)
+
+			ID := parsedExist["_id"].(bson.ObjectId)
+			if err := dao.Update("products", ID, parsedExist); err != nil {
+				fmt.Println(err)
+				//return
+			}
+		}
 
 	}
 
