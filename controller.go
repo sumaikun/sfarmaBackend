@@ -813,7 +813,7 @@ func proccessPrestashopProducts2() {
 		return
 	}
 
-	fmt.Println("result", result)
+	//fmt.Println("result", result)
 
 	for _, element := range result["products"] {
 		md, _ := element.(map[string]interface{})
@@ -1566,7 +1566,7 @@ func makeCommerssiaRequest(reference string) int {
 
 	//fmt.Println("Unzipped:\n" + strings.Join(files, "\n"))
 
-	//fmt.Println("files[0]" + files[0])
+	fmt.Println("files[0]" + files[0])
 
 	contentF, err := ioutil.ReadFile(files[0])
 	if err != nil {
@@ -1576,7 +1576,7 @@ func makeCommerssiaRequest(reference string) int {
 
 	// Convert []byte to string and print to screen
 	textF := string(contentF)
-	fmt.Println(textF)
+	//fmt.Println(textF)
 
 	m, err := mxj.NewMapXmlSeq([]byte(textF))
 	if err != nil {
@@ -1644,7 +1644,7 @@ func makeCommerssiaRequest(reference string) int {
 			}
 		}
 
-		fmt.Println("inventory qua:", amount)
+		//fmt.Println("inventory qua:", amount)
 
 		return amount
 	}
