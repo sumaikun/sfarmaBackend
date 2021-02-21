@@ -1566,7 +1566,7 @@ func makeCommerssiaRequest(reference string) int {
 
 	//fmt.Println("Unzipped:\n" + strings.Join(files, "\n"))
 
-	fmt.Println("files[0]" + files[0])
+	//fmt.Println("files[0]" + files[0])
 
 	contentF, err := ioutil.ReadFile(files[0])
 	if err != nil {
@@ -1577,6 +1577,12 @@ func makeCommerssiaRequest(reference string) int {
 	// Convert []byte to string and print to screen
 	textF := string(contentF)
 	//fmt.Println(textF)
+
+	e := os.Remove(files[0])
+	if e != nil {
+		fmt.Println("err:", err.Error())
+		return -1
+	}
 
 	m, err := mxj.NewMapXmlSeq([]byte(textF))
 	if err != nil {
