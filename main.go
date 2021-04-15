@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/robfig/cron"
@@ -184,6 +185,8 @@ func main() {
 
 	/**  commerssias connection services  */
 	router.HandleFunc("/checkProductQuantityCommerssia", checkProductQuantityCommerssia).Methods("POST")
+
+	http.DefaultClient.Timeout = time.Minute * 5
 
 	log.Fatal(http.ListenAndServe(":"+port, &CORSRouterDecorator{router}))
 
