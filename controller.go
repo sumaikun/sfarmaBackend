@@ -1947,7 +1947,7 @@ func makeCommerssiaRequestTransaction() int {
 
 	xmlTest := commerssiaTransactionString("2", "2", "2", "2", "2", "2", "2", "2", "2")
 
-	title := RandStringBytes(7)
+	title := "proccess"
 
 	file, err := os.Create("transactions/" + title + ".xml")
 	if err != nil {
@@ -2003,14 +2003,26 @@ func makeCommerssiaRequestTransaction() int {
 
 	fmt.Println("ENCODED: " + encoded)*/
 
-	bytes, err6 := ioutil.ReadFile("transactions/" + title + ".xml")
-	if err6 != nil {
-		fmt.Println("err6", err6)
+	//time.Sleep(10 * time.Second)
+
+	foo := func(title string) {
+
+		time.Sleep(3 * time.Second)
+
+		bytes, err6 := ioutil.ReadFile("transactions/" + title + ".zip")
+
+		//fmt.Println("bytes", bytes)
+
+		if err6 != nil {
+			fmt.Println("err6", err6)
+		}
+
+		base64Encoding := base64.StdEncoding.EncodeToString(bytes)
+
+		fmt.Println("base64Encoding", base64Encoding)
 	}
 
-	base64Encoding := base64.StdEncoding.EncodeToString(bytes)
-
-	fmt.Println("base64Encoding", base64Encoding)
+	go foo(title)
 
 	return 0
 }
