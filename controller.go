@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -1713,4 +1714,312 @@ func Unzip(src string, dest string) ([]string, error) {
 		}
 	}
 	return filenames, nil
+}
+
+func commerssiaTransactionString(totalRefs string,
+	idNumber string,
+	name string,
+	lastName string,
+	lastName2 string,
+	phone string,
+	address string,
+	email string,
+	consecutive string) string {
+	var b bytes.Buffer
+	b.WriteString("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><transaccion><USUARIO>624154454F2912704B06435E06425001703E0BE3AFBC</USUARIO><CLAVE>624154454F2912704B06435E06425001706657A2F2</CLAVE>")
+	b.WriteString("<encabezado>")
+	b.WriteString("<ENCDescripcion>Pedido Web</ENCDescripcion>")
+	b.WriteString("<GMVCodigo>ADM</GMVCodigo>")
+	b.WriteString("<MOVCodigo>PEDWEB</MOVCodigo>")
+	b.WriteString("<movimiento>Standar</movimiento>")
+	b.WriteString("<USUCodigo>PW</USUCodigo>")
+	b.WriteString("<CAJCodigo>ADM0101</CAJCodigo>")
+	b.WriteString("<IDEMP>SFARMA</IDEMP>")
+	b.WriteString("<ALMCodigo>ADM01</ALMCodigo>")
+	b.WriteString("<ALMNombre>ADMINISTRATIVO</ALMNombre>")
+	b.WriteString("<MONCodigo>1</MONCodigo>")
+	b.WriteString("<ENCFechaTrx>2021/05/12</ENCFechaTrx>")
+	b.WriteString("<ENCHoraTrx>10:59:59</ENCHoraTrx>")
+	b.WriteString("<ENCModo>L-C</ENCModo>")
+	b.WriteString("<ENCTipoProc>Standar</ENCTipoProc>")
+	b.WriteString("<ENCConsTrx>P0055</ENCConsTrx>")
+	b.WriteString("<ENCTasaConversion>1</ENCTasaConversion>")
+	b.WriteString("<ENCTotalReferencias>" + totalRefs + "</ENCTotalReferencias>")
+	b.WriteString("<ENCBruto>0</ENCBruto>")
+	b.WriteString("<ENCDescuento>0</ENCDescuento>")
+	b.WriteString("<ENCPagNoVenta>0</ENCPagNoVenta>")
+	b.WriteString("<ENCVenta>0</ENCVenta>")
+	b.WriteString("<ENCImpuestos>0</ENCImpuestos>")
+	b.WriteString("<ENCComision>0</ENCComision>")
+	b.WriteString("<ENCNeto>0</ENCNeto>")
+	b.WriteString("<ENCRecaudo>0</ENCRecaudo>")
+	b.WriteString("<ENCImpuestoAsumido>0</ENCImpuestoAsumido>")
+	b.WriteString("<ENCPuntos>0</ENCPuntos>")
+	b.WriteString("<ENCEstadoLinea>L</ENCEstadoLinea>")
+	b.WriteString("<ENCRespuesta>OK</ENCRespuesta>")
+	b.WriteString("<ENCDescRespuesta>NO APLICA</ENCDescRespuesta>")
+	b.WriteString("</encabezado>")
+	b.WriteString("<detalle>")
+	b.WriteString("<items>")
+
+	//default items
+	var defaultItems []map[string]string
+
+	itemD := map[string]string{
+		"nitem":           "1",
+		"ICPPresentacion": idNumber,
+		"ICPDescripcion":  "Cedula/Nit",
+		"ICPCadena":       idNumber,
+		"ICPLetra":        "CLI",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "2",
+		"ICPPresentacion": name,
+		"ICPDescripcion":  "Nombre",
+		"ICPCadena":       name,
+		"ICPLetra":        "NOM",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "3",
+		"ICPPresentacion": lastName,
+		"ICPDescripcion":  "Primer Apellido",
+		"ICPCadena":       lastName,
+		"ICPLetra":        "APE",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "4",
+		"ICPPresentacion": lastName2,
+		"ICPDescripcion":  "Segundo Apellido",
+		"ICPCadena":       lastName2,
+		"ICPLetra":        "SEGAP",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "5",
+		"ICPPresentacion": phone,
+		"ICPDescripcion":  "Telefono",
+		"ICPCadena":       phone,
+		"ICPLetra":        "TEL",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "6",
+		"ICPPresentacion": address,
+		"ICPDescripcion":  "Direccion",
+		"ICPCadena":       address,
+		"ICPLetra":        "DIR",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "7",
+		"ICPPresentacion": email,
+		"ICPDescripcion":  "Correo Electronico",
+		"ICPCadena":       email,
+		"ICPLetra":        "MAIL",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "8",
+		"ICPPresentacion": "EFECTIVO",
+		"ICPDescripcion":  "Forma de pago",
+		"ICPCadena":       "EFECTIVO",
+		"ICPLetra":        "FORMPA",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "9",
+		"ICPPresentacion": "IMPLE",
+		"ICPDescripcion":  "Vendedor",
+		"ICPCadena":       "IMPLE",
+		"ICPLetra":        "VEN",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "10",
+		"ICPPresentacion": consecutive,
+		"ICPDescripcion":  "Consecutivo Pedido Web",
+		"ICPCadena":       consecutive,
+		"ICPLetra":        "NUMPEDWEB",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	itemD = map[string]string{
+		"nitem":           "11",
+		"ICPPresentacion": "ClienteWeb",
+		"ICPDescripcion":  "Tipo Cliente Pedido Web",
+		"ICPCadena":       "1",
+		"ICPLetra":        "TCL",
+	}
+
+	defaultItems = append(defaultItems, itemD)
+
+	normalItems := comerssiaTransactionNomalItem(defaultItems)
+
+	b.WriteString(normalItems)
+
+	b.WriteString("</items>")
+	b.WriteString("</detalle>")
+	b.WriteString("</transaccion>")
+	return b.String()
+}
+
+func comerssiaTransactionNomalItem(items []map[string]string) string {
+	var b bytes.Buffer
+
+	for n := 0; n < len(items); n++ {
+		parsedItem := items[n]
+		b.WriteString("<item nitem=\"" + parsedItem["nitem"] + "\" Tipo=\"Letra\" Visible=\"True\" Imprime=\"True\">")
+		b.WriteString("<ICPPresentacion>" + parsedItem["ICPPresentacion"] + "</ICPPresentacion>")
+		b.WriteString("<ICPDescripcion>" + parsedItem["ICPDescripcion"] + "</ICPDescripcion>")
+		b.WriteString("<ICPCadena>" + parsedItem["ICPCadena"] + "</ICPCadena>")
+		b.WriteString("<ICPLetra>" + parsedItem["ICPLetra"] + "</ICPLetra>")
+		b.WriteString("</item>")
+	}
+
+	return b.String()
+}
+
+func comerssiaTransactionProductItem(items []map[string]string, j int) (string, int) {
+	var b bytes.Buffer
+
+	for n := j; n < len(items); n++ {
+		parsedItem := items[n]
+		b.WriteString("<item nitem=\"12\" Tipo=\"Referencia\" Tiporef=\"normal\" Visible=\"True\">")
+		b.WriteString("<REFCodClasificacion></REFCodClasificacion>")
+		b.WriteString("<REFCodigo1>" + parsedItem["reference"] + "</REFCodigo1>")
+		b.WriteString("<REFCodigo2>" + parsedItem["reference"] + "</REFCodigo2>")
+		b.WriteString("<REFNombreLargo>" + parsedItem["name"] + "</REFNombreLargo>")
+		b.WriteString("<CARCodigo1></CARCodigo1>")
+		b.WriteString("<REFPrecioLista>" + parsedItem["price"] + "</REFPrecioLista>")
+		b.WriteString("<IRFBruto>" + parsedItem["price"] + "</IRFBruto>")
+		b.WriteString("<IRFDescuento>0</IRFDescuento>")
+		b.WriteString("<IRFPago>" + parsedItem["price"] + "</IRFPago>")
+		b.WriteString("<IRFCantidad>" + parsedItem["quantity"] + "</IRFCantidad>")
+		b.WriteString("<IRFValorImpuesto>0</IRFValorImpuesto>")
+		b.WriteString("<IRFImpuesto>0</IRFImpuesto>")
+		b.WriteString("<REFEsCombo>0</REFEsCombo>")
+		b.WriteString("<REFUltimoCosto>0</REFUltimoCosto>")
+		b.WriteString("<PRVCodigo>CODE</PRVCodigo>")
+		b.WriteString("<REFCapturaSerial>false</REFCapturaSerial>")
+		b.WriteString("<REFManejaLotes>false</REFManejaLotes>")
+		b.WriteString("<REFFactorConversion>1</REFFactorConversion>")
+		b.WriteString("<REFInventario></REFInventario>")
+		b.WriteString("<REFEsParaVenta></REFEsParaVenta>")
+		b.WriteString("<estado>ACTIVO</estado>")
+		b.WriteString("<IRFPagNoVenta>0</IRFPagNoVenta>")
+		b.WriteString("<IRFVenta>0</IRFVenta>")
+		b.WriteString("<IRFValorImpuestoNeto>0</IRFValorImpuestoNeto>")
+		b.WriteString("<IRFComision>0</IRFComision>")
+		b.WriteString("<IRFImpuestoAsumido>0</IRFImpuestoAsumido>")
+		b.WriteString("<IRFNeto>0</IRFNeto>")
+		b.WriteString("<REFPuntos>0</REFPuntos>")
+		b.WriteString("</item>")
+		j++
+	}
+
+	return b.String(), j
+}
+
+func makeCommerssiaRequestTransaction() int {
+	//http://auditoria.comerssia.com/PDPIntegracion/wsintegracion.asmx?op=wm_EnvioTransacciones
+
+	xmlTest := commerssiaTransactionString("2", "2", "2", "2", "2", "2", "2", "2", "2")
+
+	title := RandStringBytes(7)
+
+	file, err := os.Create("transactions/" + title + ".xml")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		file.WriteString(xmlTest)
+	}
+
+	defer file.Close()
+
+	flags := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+
+	file2, err2 := os.OpenFile("transactions/"+title+".zip", flags, 0644)
+
+	if err2 != nil {
+		fmt.Println("err2", err2)
+	}
+
+	zipw := zip.NewWriter(file2)
+
+	file3, err3 := os.Open("transactions/" + title + ".xml")
+
+	if err3 != nil {
+		fmt.Println("err3", err3)
+	}
+
+	defer file3.Close()
+
+	wr, err4 := zipw.Create(title + ".xml")
+
+	if err4 != nil {
+		fmt.Println("err4", err4)
+	}
+
+	if _, err5 := io.Copy(wr, file3); err5 != nil {
+		fmt.Println("err5", err5)
+	}
+
+	defer zipw.Close()
+
+	/*file4, err6 := os.Open("transactions/" + title + ".zip")
+
+	if err6 != nil {
+		fmt.Println("err6", err6)
+	}
+
+	reader := bufio.NewReader(file4)
+	content, _ := ioutil.ReadAll(reader)
+
+	fmt.Println("content", content)
+
+	encoded := base64.StdEncoding.EncodeToString(content)
+
+	fmt.Println("ENCODED: " + encoded)*/
+
+	bytes, err6 := ioutil.ReadFile("transactions/" + title + ".xml")
+	if err6 != nil {
+		fmt.Println("err6", err6)
+	}
+
+	base64Encoding := base64.StdEncoding.EncodeToString(bytes)
+
+	fmt.Println("base64Encoding", base64Encoding)
+
+	return 0
+}
+
+func RandStringBytes(n int) string {
+	letterBytes := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

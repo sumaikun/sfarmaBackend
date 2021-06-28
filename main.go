@@ -109,13 +109,15 @@ func init() {
 
 func main() {
 
-	makeCommerssiaRequest("00020")
+	makeCommerssiaRequestTransaction()
+
+	//makeCommerssiaRequest("00020")
 
 	//go proccessPrestaShopDistributors()
 
 	//go proccessPrestashopSuppliers()
 
-	go proccessPrestashopProducts()
+	//go proccessPrestashopProducts()
 
 	//go proccessPrestaShopProductcategories()
 
