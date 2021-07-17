@@ -109,7 +109,7 @@ func init() {
 
 func main() {
 
-	makeCommerssiaRequestTransaction()
+	//makeCommerssiaRequestTransaction("6723")
 
 	//makeCommerssiaRequest("00020")
 
@@ -120,6 +120,8 @@ func main() {
 	//go proccessPrestashopProducts()
 
 	//go proccessPrestaShopProductcategories()
+
+	checkPaymentsToSend()
 
 	c := cron.New()
 	//c.AddFunc("*/5 * * * *", func() {
@@ -133,6 +135,11 @@ func main() {
 
 		go proccessPrestaShopProductcategories()
 	})
+
+	c.AddFunc("*/17 * * * *", func() {
+		go checkPaymentsToSend()
+	})
+
 	c.Start()
 
 	//initEvents()

@@ -32,6 +32,15 @@ import (
 	"github.com/clbanning/mxj"
 )
 
+var (
+	lastTracked float64
+)
+
+func init() {
+	fmt.Println("init executed")
+	lastTracked = 0
+}
+
 //-----------------------------  Auth functions --------------------------------------------------
 
 func authentication(w http.ResponseWriter, r *http.Request) {
@@ -1716,6 +1725,8 @@ func Unzip(src string, dest string) ([]string, error) {
 	return filenames, nil
 }
 
+//------------------------------------ commerssia transaction
+
 func commerssiaTransactionString(totalRefs string,
 	idNumber string,
 	name string,
@@ -1724,7 +1735,9 @@ func commerssiaTransactionString(totalRefs string,
 	phone string,
 	address string,
 	email string,
-	consecutive string) string {
+	consecutive string,
+	items []interface{}) string {
+	t := time.Now()
 	var b bytes.Buffer
 	b.WriteString("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><transaccion><USUARIO>624154454F2912704B06435E06425001703E0BE3AFBC</USUARIO><CLAVE>624154454F2912704B06435E06425001706657A2F2</CLAVE>")
 	b.WriteString("<encabezado>")
@@ -1738,8 +1751,11 @@ func commerssiaTransactionString(totalRefs string,
 	b.WriteString("<ALMCodigo>ADM01</ALMCodigo>")
 	b.WriteString("<ALMNombre>ADMINISTRATIVO</ALMNombre>")
 	b.WriteString("<MONCodigo>1</MONCodigo>")
-	b.WriteString("<ENCFechaTrx>2021/05/12</ENCFechaTrx>")
-	b.WriteString("<ENCHoraTrx>10:59:59</ENCHoraTrx>")
+	b.WriteString("<ENCFechaTrx>" + fmt.Sprintf("%d/%02d/%02d",
+		t.Year(), t.Month(), t.Day(),
+	) + "</ENCFechaTrx>")
+	b.WriteString("<ENCHoraTrx>" + fmt.Sprintf("%02d:%02d:%02d",
+		t.Hour(), t.Minute(), t.Second()) + "</ENCHoraTrx>")
 	b.WriteString("<ENCModo>L-C</ENCModo>")
 	b.WriteString("<ENCTipoProc>Standar</ENCTipoProc>")
 	b.WriteString("<ENCConsTrx>P0055</ENCConsTrx>")
@@ -1879,6 +1895,24 @@ func commerssiaTransactionString(totalRefs string,
 
 	b.WriteString(normalItems)
 
+	transacItems := []map[string]string{}
+
+	for n := 0; n < len(items); n++ {
+		transacItem := map[string]string{}
+		parsedItem := items[n].(map[string]interface{})
+		transacItem["reference"] = parsedItem["product_id"].(string)
+		transacItem["name"] = parsedItem["product_name"].(string)
+		transacItem["price"] = parsedItem["product_price"].(string)
+		transacItem["quantity"] = parsedItem["product_quantity"].(string)
+		transacItems = append(transacItems, transacItem)
+	}
+
+	//fmt.Println("transacItems", transacItems)
+
+	productItems, _ := comerssiaTransactionProductItem(transacItems, 12)
+
+	b.WriteString(productItems)
+
 	b.WriteString("</items>")
 	b.WriteString("</detalle>")
 	b.WriteString("</transaccion>")
@@ -1904,9 +1938,9 @@ func comerssiaTransactionNomalItem(items []map[string]string) string {
 func comerssiaTransactionProductItem(items []map[string]string, j int) (string, int) {
 	var b bytes.Buffer
 
-	for n := j; n < len(items); n++ {
+	for n := 0; n < len(items); n++ {
 		parsedItem := items[n]
-		b.WriteString("<item nitem=\"12\" Tipo=\"Referencia\" Tiporef=\"normal\" Visible=\"True\">")
+		b.WriteString("<item nitem=\"" + strconv.Itoa(j) + "\" Tipo=\"Referencia\" Tiporef=\"normal\" Visible=\"True\">")
 		b.WriteString("<REFCodClasificacion></REFCodClasificacion>")
 		b.WriteString("<REFCodigo1>" + parsedItem["reference"] + "</REFCodigo1>")
 		b.WriteString("<REFCodigo2>" + parsedItem["reference"] + "</REFCodigo2>")
@@ -1942,10 +1976,76 @@ func comerssiaTransactionProductItem(items []map[string]string, j int) (string, 
 	return b.String(), j
 }
 
-func makeCommerssiaRequestTransaction() int {
+func makeCommerssiaRequestTransaction(id_order string) int {
 	//http://auditoria.comerssia.com/PDPIntegracion/wsintegracion.asmx?op=wm_EnvioTransacciones
 
-	xmlTest := commerssiaTransactionString("2", "2", "2", "2", "2", "2", "2", "2", "2")
+	// ------------  services proccess
+
+	resultOrders, err := getAllRequest("https://sfarmadroguerias.com/api/orders?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[id,id_cart,id_customer,payment,current_state,total_discounts,total_paid,total_products,id_address_delivery]&output_format=JSON&filter[id]=" + id_order)
+
+	if err != nil {
+
+		return 0
+	}
+
+	ordersObject := resultOrders["orders"]
+
+	ordersObjectDetail := ordersObject[0].(map[string]interface{})
+
+	time.Sleep(2 * time.Second)
+
+	resultAddress, err2 := getAllRequest("https://sfarmadroguerias.com/api/addresses?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[dni,lastname,firstname,address1,phone]&output_format=JSON&filter[id]=" + ordersObjectDetail["id_address_delivery"].(string))
+
+	if err2 != nil {
+
+		return 0
+	}
+
+	addressObject := resultAddress["addresses"]
+
+	addressObjectDetail := addressObject[0].(map[string]interface{})
+
+	//fmt.Println("resultAddress", resultAddress)
+
+	time.Sleep(2 * time.Second)
+
+	resultCustomer, err3 := getAllRequest("https://sfarmadroguerias.com/api/customers?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[email]&output_format=JSON&sort=id_DESC&filter[id]=" + ordersObjectDetail["id_customer"].(string))
+
+	if err3 != nil {
+
+		return 0
+	}
+
+	customersObject := resultCustomer["customers"]
+
+	customersObjectDetail := customersObject[0].(map[string]interface{})
+
+	//fmt.Println("resultCustomer", resultCustomer)
+
+	time.Sleep(2 * time.Second)
+
+	resultProducts, err4 := getAllRequest("https://sfarmadroguerias.com/api/order_details?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[product_id,product_name,product_quantity,product_price]&output_format=JSON&filter[id_order]=" + id_order)
+
+	if err4 != nil {
+
+		return 0
+	}
+
+	//fmt.Println("resultProducts", len(resultProducts["order_details"]))
+
+	totalRefs := strconv.Itoa(len(resultProducts["order_details"]))
+	idNumber := addressObjectDetail["dni"].(string)
+	name := addressObjectDetail["firstname"].(string)
+	lastName := addressObjectDetail["lastname"].(string)
+	lastName2 := ""
+	phone := addressObjectDetail["phone"].(string)
+	address := addressObjectDetail["address1"].(string)
+	email := customersObjectDetail["email"].(string)
+	consecutive := id_order
+
+	// ------------  services proccess
+
+	xmlTest := commerssiaTransactionString(totalRefs, idNumber, name, lastName, lastName2, phone, address, email, consecutive, resultProducts["order_details"])
 
 	title := "proccess"
 
@@ -1988,24 +2088,7 @@ func makeCommerssiaRequestTransaction() int {
 
 	defer zipw.Close()
 
-	/*file4, err6 := os.Open("transactions/" + title + ".zip")
-
-	if err6 != nil {
-		fmt.Println("err6", err6)
-	}
-
-	reader := bufio.NewReader(file4)
-	content, _ := ioutil.ReadAll(reader)
-
-	fmt.Println("content", content)
-
-	encoded := base64.StdEncoding.EncodeToString(content)
-
-	fmt.Println("ENCODED: " + encoded)*/
-
-	//time.Sleep(10 * time.Second)
-
-	foo := func(title string) {
+	generateBase64 := func(title string) {
 
 		time.Sleep(3 * time.Second)
 
@@ -2022,7 +2105,7 @@ func makeCommerssiaRequestTransaction() int {
 		fmt.Println("base64Encoding", base64Encoding)
 	}
 
-	go foo(title)
+	go generateBase64(title)
 
 	return 0
 }
@@ -2034,4 +2117,30 @@ func RandStringBytes(n int) string {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
 	return string(b)
+}
+
+func checkPaymentsToSend() {
+	resultPayments, _ := getAllRequest("https://sfarmadroguerias.com/api/order_payments?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[id,order_reference,amount,date_add]&output_format=JSON&sort=id_DESC&limit=20")
+	paymentsObject := resultPayments["order_payments"]
+	paymentsObjectDetail := paymentsObject[0].(map[string]interface{})
+
+	lastID := paymentsObjectDetail["id"].(float64)
+
+	if lastID > lastTracked {
+		for n := 0; n < len(paymentsObject); n++ {
+			parsedPayment := paymentsObject[n].(map[string]interface{})
+			if parsedPayment["id"].(float64) > lastTracked {
+				orderReference := parsedPayment["order_reference"].(string)
+				pureReference := strings.Replace(orderReference, "ORD-", "", 1)
+				pureReferenceInt, _ := strconv.Atoi(pureReference)
+				pureReferenceStr := strconv.Itoa(pureReferenceInt)
+				makeCommerssiaRequestTransaction(pureReferenceStr)
+				time.Sleep(5 * time.Second)
+			}
+		}
+
+		lastTracked = lastID
+
+	}
+
 }
