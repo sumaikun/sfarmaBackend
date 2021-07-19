@@ -1900,7 +1900,7 @@ func commerssiaTransactionString(totalRefs string,
 	for n := 0; n < len(items); n++ {
 		transacItem := map[string]string{}
 		parsedItem := items[n].(map[string]interface{})
-		transacItem["reference"] = parsedItem["product_id"].(string)
+		transacItem["reference"] = parsedItem["product_reference"].(string)
 		transacItem["name"] = parsedItem["product_name"].(string)
 		transacItem["price"] = parsedItem["product_price"].(string)
 		transacItem["quantity"] = parsedItem["product_quantity"].(string)
@@ -2024,7 +2024,7 @@ func makeCommerssiaRequestTransaction(id_order string) int {
 
 	time.Sleep(2 * time.Second)
 
-	resultProducts, err4 := getAllRequest("https://sfarmadroguerias.com/api/order_details?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[product_id,product_name,product_quantity,product_price]&output_format=JSON&filter[id_order]=" + id_order)
+	resultProducts, err4 := getAllRequest("https://sfarmadroguerias.com/api/order_details?ws_key=ITEBHIEURLT922QIBK8WRYLXS589QDPV&display=[product_name,product_quantity,product_price,product_reference]&output_format=JSON&filter[id_order]=" + id_order)
 
 	if err4 != nil {
 
@@ -2092,7 +2092,7 @@ func makeCommerssiaRequestTransaction(id_order string) int {
 
 		time.Sleep(3 * time.Second)
 
-		bytes, err6 := ioutil.ReadFile("transactions/" + title + ".zip")
+		bytesE, err6 := ioutil.ReadFile("transactions/" + title + ".zip")
 
 		//fmt.Println("bytes", bytes)
 
@@ -2100,9 +2100,9 @@ func makeCommerssiaRequestTransaction(id_order string) int {
 			fmt.Println("err6", err6)
 		}
 
-		base64Encoding := base64.StdEncoding.EncodeToString(bytes)
+		base64Encoding := base64.StdEncoding.EncodeToString(bytesE)
 
-		fmt.Println("base64Encoding", base64Encoding)
+		testRequestSend(base64Encoding)
 	}
 
 	go generateBase64(title)
@@ -2143,4 +2143,46 @@ func checkPaymentsToSend() {
 
 	}
 
+}
+
+func testRequestSend(base string) {
+	var b bytes.Buffer
+	b.WriteString("<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"	xmlns:tem=\"http://tempuri.org/\">")
+	b.WriteString("<soap:Header/>")
+	b.WriteString("<soap:Body>")
+	b.WriteString("<tem:wm_EnvioTransaccionesCompletarTrx>")
+	b.WriteString("<tem:pi_sIdemp>")
+	b.WriteString("SFARMA")
+	b.WriteString("</tem:pi_sIdemp>")
+	b.WriteString("<tem:pi_sEnvio>")
+	b.WriteString("UEsDBBQACAAIAAAAAAAAAAAAAAAAAAAAAAAMAAAAcHJvY2Nlc3MueG1spJhfj5s4F8a/Csp7PcWQ/5WHvowDXXYhQSSTai894Em9AjsyZDTaT7+ygWCSNFRKL5qc5zk+8LMxOR747bPIjQ8iSsrZ88j6AkYGYSnPKDs8j4Lt5mmxmC6frNE3B1YCsxKnKeXMga/bVzcJNs7MnljTyWQ68e2lZc/B5AXMJuOpB2YTewqANQdjD7x4Y9d/QdBsR0EUunvvNwbPZtO5a/s2NOsRkLAUv5F/ccYd6K3RipSpoEd1TzHJaMaNH+QNmhcW/B7tEc/ogTvuKoJmF8Jo036NvdUP7wWanQIL/kELSljFnW2FWYYFNDVNzkI7+Ieiawci98/uesACFjQ7CQYrL4qdre8mkQvNOoJuGOlDoNkJ0lvz4k0Q6QXrYLtL3F2w36ikxoHRZt3kWxKiDeQ0+ST9iXfi07GBbZlgblpLNUdnXSb9wYX6DpZfJ9bXia0yWlEmRDzjTviElKECqe7okceCp90M6aLMQJyVskYMwHSq7FZR43GJEWfNMyjv/VpUebzCeULeiSAspbhsMy9lmfsiThV3gEqov7cPy0ktHDg/IXUs3Rgf1nxPWIUbWxOkr1udGhTHEykrXjZOF9fkBVUAoMFuQumtyflG1FepJSTFp6yV20i/jlueCnrOuFQVx4l1t9MEUvfKCmc8pIxgJ1SmrtRXL1U57Gz+am6gFdrp65T1xnDjMEDueSq1bFPfphmpcJ4TB9KKFGX9YTD5//PIGhnyUXkehaQSeGTsaUnfcvI82okTGRlBcRS0aEMHBiiOBSnl7Kt9PR1b9thazqF56chU/Q2ASHbKsbmmlcrtvRwCFCOcEYb79RpN2uruHBQGyqgjaEqEPo79GM4aVz9xTokxzFNv+nss/WJXMOtNNAAzfgzmOxYpxcMksawiDPdI8pxm/B6SVvKKx429AZ7JYzzDJFtyOLGM/xbKbYit992NBzCmj2GMAbDnUzC3rGGgHcnJO2d3QS7qXSHtvHAAaPYYEBLGYv5m/G8xfxrPhplWVBDVw9yDuq55xbUKkgGu+WNcn58f8scJ//8nrwpM8y8pL4bxEBeCcMPLSVoJzmh6d/F+eY0r3MgNhtZx8Riv53uo7mmGGH0uCmxkxDjiw128XskrJH+TRLE7ALV8DCqI4tAbJtoTlpGMi3swXakrkr23HsCwwGMcs/l4Oowh2zqSnir6wQ29G/811Lnu9e/Ta9Q25PfJHmwhUC57edLe5/33IT1yoxnwm4C/eiuiod1knXuJrrmtFUHen0dM7oH8ktaBiecjnqEcl/Sdpu0v1021FumBWw6ygG2BRZuotM63b/i28usuJMTiwJ0Xb7X520M717AMN4o3YeiqfD0HIjc51zf1IPH8WJCU8pDKDtJeLgD4AtQ/VUU3YZD4dVffTzvLMqHX7Pdi6cb4cGO0UqWNMKtohjNnrPRzKL09zrloG++meF+TWRcJnZd4vlciXrwpS4uk85pXtOCINwMvFBgn7ckUbVYeNLtYLRY+VieBt0RQnDvvOC9JvWA9XWZGmJF/cMgrUmp5uiqzfJxWXPSPZrdkmRuwD7lrBOX106bHijHGAjenJvNSIOoc4rjNu7oJm2XSzmR9Qa2FZmmqvhrtMeumrtZaO6Ppob6K2qnrhioztcvUleUzez6JdUG71dWHDM+nI1P/+8p/AQAA//9QSwcIz7xnyegEAACYEQAAUEsBAhQAFAAIAAgAAAAAAM+8Z8noBAAAmBEAAAwAAAAAAAAAAAAAAAAAAAAAAHByb2NjZXNzLnhtbFBLBQYAAAAAAQABADoAAAAiBQAAAAA=")
+	b.WriteString("</tem:pi_sEnvio>")
+	b.WriteString("</tem:wm_EnvioTransaccionesCompletarTrx>")
+	b.WriteString("</soap:Body>")
+	b.WriteString("</soap:Envelope>")
+
+	var xmlStr = []byte(b.String())
+
+	req, err := http.NewRequest("POST", "http://auditoria.comerssia.com/PDPIntegracion/wsintegracion.asmx", bytes.NewBuffer(xmlStr))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	// We need to set the content type from the writer, it includes necessary boundary as well
+	req.Header.Set("Content-Type", "text/xml")
+
+	// Do the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("err:", err.Error())
+		return
+	}
+
+	fmt.Println("resp", resp)
+
+	body, err := ioutil.ReadAll(resp.Body)
+	bodyString := string(body)
+	resp.Body.Close()
+
+	fmt.Println("bodyString", bodyString)
 }
