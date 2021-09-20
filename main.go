@@ -136,8 +136,9 @@ func main() {
 		go proccessPrestaShopProductcategories()
 	})
 
-	c.AddFunc("*/17 * * * *", func() {
-		go checkPaymentsToSend()
+	c.AddFunc("@every 5m", func() {
+		fmt.Println("executing each 9 minutes")
+		checkPaymentsToSend()
 	})
 
 	c.Start()

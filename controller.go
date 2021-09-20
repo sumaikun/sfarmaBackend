@@ -1739,7 +1739,7 @@ func commerssiaTransactionString(totalRefs string,
 	items []interface{}) string {
 	t := time.Now()
 	var b bytes.Buffer
-	b.WriteString("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><transaccion><USUARIO>624154454F2912704B06435E06425001703E0BE3AFBC</USUARIO><CLAVE>624154454F2912704B06435E06425001706657A2F2</CLAVE>")
+	b.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\"?><transaccion><USUARIO>624154454F2912704B06435E06425001703E0BE3AFBC</USUARIO><CLAVE>624154454F2912704B06435E06425001706657A2F2</CLAVE>")
 	b.WriteString("<encabezado>")
 	b.WriteString("<ENCDescripcion>Pedido Web</ENCDescripcion>")
 	b.WriteString("<GMVCodigo>ADM</GMVCodigo>")
