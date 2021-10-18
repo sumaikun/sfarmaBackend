@@ -1758,7 +1758,8 @@ func commerssiaTransactionString(totalRefs string,
 		t.Hour(), t.Minute(), t.Second()) + "</ENCHoraTrx>")
 	b.WriteString("<ENCModo>L-C</ENCModo>")
 	b.WriteString("<ENCTipoProc>Standar</ENCTipoProc>")
-	b.WriteString("<ENCConsTrx>P0055</ENCConsTrx>")
+	// strconv.Itoa(rand.Intn(99999-1+1)+1)
+	b.WriteString("<ENCConsTrx>P0" + consecutive + "</ENCConsTrx>")
 	b.WriteString("<ENCTasaConversion>1</ENCTasaConversion>")
 	b.WriteString("<ENCTotalReferencias>" + totalRefs + "</ENCTotalReferencias>")
 	b.WriteString("<ENCBruto>0</ENCBruto>")
@@ -2047,7 +2048,7 @@ func makeCommerssiaRequestTransaction(id_order string) int {
 
 	xmlTest := commerssiaTransactionString(totalRefs, idNumber, name, lastName, lastName2, phone, address, email, consecutive, resultProducts["order_details"])
 
-	title := "proccess"
+	title := "proccess" + strconv.Itoa(rand.Intn(99999-1+1)+1)
 
 	file, err := os.Create("transactions/" + title + ".xml")
 	if err != nil {
@@ -2155,7 +2156,7 @@ func testRequestSend(base string) {
 	b.WriteString("SFARMA")
 	b.WriteString("</tem:pi_sIdemp>")
 	b.WriteString("<tem:pi_sEnvio>")
-	b.WriteString("UEsDBBQACAAIAAAAAAAAAAAAAAAAAAAAAAAMAAAAcHJvY2Nlc3MueG1spJhfj5s4F8a/Csp7PcWQ/5WHvowDXXYhQSSTai894Em9AjsyZDTaT7+ygWCSNFRKL5qc5zk+8LMxOR747bPIjQ8iSsrZ88j6AkYGYSnPKDs8j4Lt5mmxmC6frNE3B1YCsxKnKeXMga/bVzcJNs7MnljTyWQ68e2lZc/B5AXMJuOpB2YTewqANQdjD7x4Y9d/QdBsR0EUunvvNwbPZtO5a/s2NOsRkLAUv5F/ccYd6K3RipSpoEd1TzHJaMaNH+QNmhcW/B7tEc/ogTvuKoJmF8Jo036NvdUP7wWanQIL/kELSljFnW2FWYYFNDVNzkI7+Ieiawci98/uesACFjQ7CQYrL4qdre8mkQvNOoJuGOlDoNkJ0lvz4k0Q6QXrYLtL3F2w36ikxoHRZt3kWxKiDeQ0+ST9iXfi07GBbZlgblpLNUdnXSb9wYX6DpZfJ9bXia0yWlEmRDzjTviElKECqe7okceCp90M6aLMQJyVskYMwHSq7FZR43GJEWfNMyjv/VpUebzCeULeiSAspbhsMy9lmfsiThV3gEqov7cPy0ktHDg/IXUs3Rgf1nxPWIUbWxOkr1udGhTHEykrXjZOF9fkBVUAoMFuQumtyflG1FepJSTFp6yV20i/jlueCnrOuFQVx4l1t9MEUvfKCmc8pIxgJ1SmrtRXL1U57Gz+am6gFdrp65T1xnDjMEDueSq1bFPfphmpcJ4TB9KKFGX9YTD5//PIGhnyUXkehaQSeGTsaUnfcvI82okTGRlBcRS0aEMHBiiOBSnl7Kt9PR1b9thazqF56chU/Q2ASHbKsbmmlcrtvRwCFCOcEYb79RpN2uruHBQGyqgjaEqEPo79GM4aVz9xTokxzFNv+nss/WJXMOtNNAAzfgzmOxYpxcMksawiDPdI8pxm/B6SVvKKx429AZ7JYzzDJFtyOLGM/xbKbYit992NBzCmj2GMAbDnUzC3rGGgHcnJO2d3QS7qXSHtvHAAaPYYEBLGYv5m/G8xfxrPhplWVBDVw9yDuq55xbUKkgGu+WNcn58f8scJ//8nrwpM8y8pL4bxEBeCcMPLSVoJzmh6d/F+eY0r3MgNhtZx8Riv53uo7mmGGH0uCmxkxDjiw128XskrJH+TRLE7ALV8DCqI4tAbJtoTlpGMi3swXakrkr23HsCwwGMcs/l4Oowh2zqSnir6wQ29G/811Lnu9e/Ta9Q25PfJHmwhUC57edLe5/33IT1yoxnwm4C/eiuiod1knXuJrrmtFUHen0dM7oH8ktaBiecjnqEcl/Sdpu0v1021FumBWw6ygG2BRZuotM63b/i28usuJMTiwJ0Xb7X520M717AMN4o3YeiqfD0HIjc51zf1IPH8WJCU8pDKDtJeLgD4AtQ/VUU3YZD4dVffTzvLMqHX7Pdi6cb4cGO0UqWNMKtohjNnrPRzKL09zrloG++meF+TWRcJnZd4vlciXrwpS4uk85pXtOCINwMvFBgn7ckUbVYeNLtYLRY+VieBt0RQnDvvOC9JvWA9XWZGmJF/cMgrUmp5uiqzfJxWXPSPZrdkmRuwD7lrBOX106bHijHGAjenJvNSIOoc4rjNu7oJm2XSzmR9Qa2FZmmqvhrtMeumrtZaO6Ppob6K2qnrhioztcvUleUzez6JdUG71dWHDM+nI1P/+8p/AQAA//9QSwcIz7xnyegEAACYEQAAUEsBAhQAFAAIAAgAAAAAAM+8Z8noBAAAmBEAAAwAAAAAAAAAAAAAAAAAAAAAAHByb2NjZXNzLnhtbFBLBQYAAAAAAQABADoAAAAiBQAAAAA=")
+	b.WriteString(base)
 	b.WriteString("</tem:pi_sEnvio>")
 	b.WriteString("</tem:wm_EnvioTransaccionesCompletarTrx>")
 	b.WriteString("</soap:Body>")
