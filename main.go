@@ -121,7 +121,7 @@ func main() {
 
 	//go proccessPrestaShopProductcategories()
 
-	checkPaymentsToSend()
+	//checkPaymentsToSend()
 
 	c := cron.New()
 	//c.AddFunc("*/5 * * * *", func() {

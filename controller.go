@@ -1784,9 +1784,9 @@ func commerssiaTransactionString(totalRefs string,
 
 	itemD := map[string]string{
 		"nitem":           "1",
-		"ICPPresentacion": idNumber,
+		"ICPPresentacion": "C" + idNumber,
 		"ICPDescripcion":  "Cedula/Nit",
-		"ICPCadena":       idNumber,
+		"ICPCadena":       "C" + idNumber,
 		"ICPLetra":        "CLI",
 	}
 
@@ -2048,8 +2048,8 @@ func makeCommerssiaRequestTransaction(id_order string) int {
 
 	xmlTest := commerssiaTransactionString(totalRefs, idNumber, name, lastName, lastName2, phone, address, email, consecutive, resultProducts["order_details"])
 
-	title := "proccess" + strconv.Itoa(rand.Intn(99999-1+1)+1)
-
+	// title := "proccess" + strconv.Itoa(rand.Intn(99999-1+1)+1)
+	title := "proccess"
 	file, err := os.Create("transactions/" + title + ".xml")
 	if err != nil {
 		fmt.Println(err)
@@ -2179,7 +2179,7 @@ func testRequestSend(base string) {
 		return
 	}
 
-	fmt.Println("resp", resp)
+	// fmt.Println("resp", resp)
 
 	body, err := ioutil.ReadAll(resp.Body)
 	bodyString := string(body)
